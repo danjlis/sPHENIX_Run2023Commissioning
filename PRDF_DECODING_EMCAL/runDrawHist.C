@@ -29,7 +29,12 @@ void runDrawHist(int i=2)
   h_energy_eta->Scale(1./sc);
   h_energy_phi->Scale(1./sc);
 
-  double textdiff = 0.05;
+  double text_etax = 0.5;
+  double text_etay = 0.5;
+  double text_phix = 0.5;
+  double text_phiy = 0.3;
+  double text_ex = 0.5;
+  double text_ey = 0.8;
   gStyle->SetOptStat(0);
   TCanvas* c_2dmap = new TCanvas("c_2Dmap","",600,600);
   c_2dmap->cd();
@@ -53,7 +58,7 @@ void runDrawHist(int i=2)
   c_energy_eta->SetRightMargin(0.13);
   SetHistStyleSmall(h_energy_eta,0,4);
   h_energy_eta->Draw();
-  drawText(Form("Averaged over %s",strevt.c_str()),0.6,0.5,1,17);
+  drawText(Form("Averaged over %s",strevt.c_str()),text_etax,text_etay,1,17);
 
   TCanvas* c_energy_phi = new TCanvas("c_energy_phi","",600,600);
   c_energy_phi->cd();
@@ -61,7 +66,7 @@ void runDrawHist(int i=2)
   c_energy_phi->SetRightMargin(0.13);
   SetHistStyleSmall(h_energy_phi,0,4);
   h_energy_phi->Draw();
-  drawText(Form("Averaged over %s",strevt.c_str()),0.5,0.3,1,17);
+  drawText(Form("Averaged over %s",strevt.c_str()),text_phix,text_phiy,1,17);
 
   TCanvas* c_energy = new TCanvas("c_energy","",600,600);
   c_energy->cd();
@@ -70,7 +75,7 @@ void runDrawHist(int i=2)
   c_energy->SetRightMargin(0.08);
   SetHistStyleSmall(h_energy,0,4);
   h_energy->Draw();
-  drawText(Form("Averaged over %s",strevt.c_str()),0.7,0.8,1,17);
+  drawText(Form("Averaged over %s",strevt.c_str()),text_ex,text_ey,1,17);
 
   if(i>0){
     h_waveform = (TH1D*) rf->Get(Form("h_waveform_eta%d_phi%d",etabinsel,phibinsel));
