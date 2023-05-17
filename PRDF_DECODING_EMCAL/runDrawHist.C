@@ -41,9 +41,10 @@ void runDrawHist(int i=2)
   c_2dmap_avg->cd();
   c_2dmap_avg->SetLeftMargin(0.15);
   c_2dmap_avg->SetRightMargin(0.16);
-  h_energy_map->Scale(1./sc);
-  h_energy_map->Draw("colz");
-  h_energy_map->SetTitle("#eta vs #phi tower energy map");
+  TH2D* h_energy_map_avg = (TH2D*) h_energy_map->Clone("h_energy_map_avg");
+  h_energy_map_avg->Scale(1./sc);
+  h_energy_map_avg->Draw("colz");
+  h_energy_map_avg->SetTitle("#eta vs #phi average tower energy map");
 
   TCanvas* c_energy_eta = new TCanvas("c_energy_eta","",600,600);
   c_energy_eta->cd();
