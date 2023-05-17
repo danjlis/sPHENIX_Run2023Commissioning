@@ -9,8 +9,13 @@ void runDrawHist(int i=2)
   TFile* rf;
   if(i>0) rf = new TFile(Form("OutputHist_event%d.root",i),"read");
   else rf = new TFile("OutputHist_all.root","read");
+
+  string outdir = "plots";
+  void * dirf = gSystem->OpenDirectory(outdir.c_str());
+  if(dirf) gSystem->FreeDirectory(dirf);
+  else {gSystem->mkdir(outdir.c_str(), kTRUE);}
+
   TH1D* h_event = (TH1D*) rf->Get("h_event");
-  
   TH1D* h_energy = (TH1D*) rf->Get("h_energy");
   TH1D* h_energy_eta = (TH1D*) rf->Get("h_energy_eta");
   TH1D* h_energy_phi = (TH1D*) rf->Get("h_energy_phi");
@@ -74,19 +79,19 @@ void runDrawHist(int i=2)
     c_waveform->SetLeftMargin(0.14);
     c_waveform->SetRightMargin(0.13);
     h_waveform->Draw("LPE");
-    c_waveform->SaveAs(Form("waveform_event%d_etabin%d_phibin%d.pdf",i,etabinsel,phibinsel));
-    c_2dmap->SaveAs(Form("c_EMCAL_2D_mapping_event%d.pdf",i));
-    c_2dmap_avg->SaveAs(Form("c_EMCAL_2D_mapping_avg_event%d.pdf",i));
-    c_energy_eta->SaveAs(Form("c_energy_eta_event%d.pdf",i));
-    c_energy_phi->SaveAs(Form("c_energy_phi_event%d.pdf",i));
-    c_energy->SaveAs(Form("c_energy_event%d.pdf",i));
+    c_waveform->SaveAs(Form("%s/waveform_event%d_etabin%d_phibin%d.pdf",outdir.c_str(),i,etabinsel,phibinsel));
+    c_2dmap->SaveAs(Form("%s/c_EMCAL_2D_mapping_event%d.pdf",outdir.c_str(),i));
+    c_2dmap_avg->SaveAs(Form("%s/c_EMCAL_2D_mapping_avg_event%d.pdf",outdir.c_str(),i));
+    c_energy_eta->SaveAs(Form("%s/c_energy_eta_event%d.pdf",outdir.c_str(),i));
+    c_energy_phi->SaveAs(Form("%s/c_energy_phi_event%d.pdf",outdir.c_str(),i));
+    c_energy->SaveAs(Form("%s/c_energy_event%d.pdf",outdir.c_str(),i));
   }
   else{
-    c_2dmap->SaveAs("c_EMCAL_2D_mapping_all.pdf");
-    c_2dmap_avg->SaveAs("c_EMCAL_2D_mapping_avg_all.pdf");
-    c_energy_eta->SaveAs("c_energy_eta.pdf");
-    c_energy_phi->SaveAs("c_energy_phi.pdf");
-    c_energy->SaveAs("c_energy.pdf");
+    c_2dmap->SaveAs(Form("%s/c_EMCAL_2D_mapping_all.pdf",outdir.c_str()));
+    c_2dmap_avg->SaveAs(Form("%s/c_EMCAL_2D_mapping_avg_all.pdf",outdir.c_str()));
+    c_energy_eta->SaveAs(Form("%s/c_energy_eta.pdf",outdir.c_str()));
+    c_energy_phi->SaveAs(Form("%s/c_energy_phi.pdf",outdir.c_str()));
+    c_energy->SaveAs(Form("%s/c_energy.pdf",outdir.c_str()));
   }
 
 } 
