@@ -29,13 +29,14 @@ void runDrawHist(int i=2)
   h_energy_eta->Scale(1./sc);
   h_energy_phi->Scale(1./sc);
 
+  double textdiff = 0.05;
   gStyle->SetOptStat(0);
   TCanvas* c_2dmap = new TCanvas("c_2Dmap","",600,600);
   c_2dmap->cd();
   c_2dmap->SetLeftMargin(0.15);
   c_2dmap->SetRightMargin(0.16);
   h_energy_map->Draw("colz");
-  h_energy_map->SetTitle("#eta vs #phi tower energy map");
+  h_energy_map->SetTitle(Form("#eta vs #phi tower energy %s",strevt.c_str()));
 
   TCanvas* c_2dmap_avg = new TCanvas("c_2Dmap_avg","",600,600);
   c_2dmap_avg->cd();
@@ -44,7 +45,7 @@ void runDrawHist(int i=2)
   TH2D* h_energy_map_avg = (TH2D*) h_energy_map->Clone("h_energy_map_avg");
   h_energy_map_avg->Scale(1./sc);
   h_energy_map_avg->Draw("colz");
-  h_energy_map_avg->SetTitle("#eta vs #phi average tower energy map");
+  h_energy_map_avg->SetTitle(Form("#eta vs #phi average tower energy %s",strevt.c_str()));
 
   TCanvas* c_energy_eta = new TCanvas("c_energy_eta","",600,600);
   c_energy_eta->cd();
@@ -52,7 +53,7 @@ void runDrawHist(int i=2)
   c_energy_eta->SetRightMargin(0.13);
   SetHistStyleSmall(h_energy_eta,0,4);
   h_energy_eta->Draw();
-  drawText(strevt.c_str(),0.6,0.5,1,17);
+  drawText(Form("Averaged over %s",strevt.c_str()),0.6,0.5,1,17);
 
   TCanvas* c_energy_phi = new TCanvas("c_energy_phi","",600,600);
   c_energy_phi->cd();
@@ -60,7 +61,7 @@ void runDrawHist(int i=2)
   c_energy_phi->SetRightMargin(0.13);
   SetHistStyleSmall(h_energy_phi,0,4);
   h_energy_phi->Draw();
-  drawText(strevt.c_str(),0.5,0.3,1,17);
+  drawText(Form("Averaged over %s",strevt.c_str()),0.5,0.3,1,17);
 
   TCanvas* c_energy = new TCanvas("c_energy","",600,600);
   c_energy->cd();
@@ -69,7 +70,7 @@ void runDrawHist(int i=2)
   c_energy->SetRightMargin(0.08);
   SetHistStyleSmall(h_energy,0,4);
   h_energy->Draw();
-  drawText(strevt.c_str(),0.7,0.8,1,17);
+  drawText(Form("Averaged over %s",strevt.c_str()),0.7,0.8,1,17);
 
   if(i>0){
     h_waveform = (TH1D*) rf->Get(Form("h_waveform_eta%d_phi%d",etabinsel,phibinsel));
