@@ -58,9 +58,9 @@ void runDrawHist(int i=2)
   TLegend* leg_n = new TLegend(legx1,legy1,legx2,legy2);
   SetLegendStyle(leg_n);
   leg_n->SetHeader(Form("#bf{%s} - %s",str_date.c_str(), strevt.c_str()));
-  leg_n->AddEntry(h_ADC_sum_s,"MBD charge north","pe");
+  leg_n->AddEntry(h_ADC_sum_n,"MBD charge north","pe");
   leg_n->Draw("same");
-  c_ADC_sum_s->SaveAs(Form("%s/MBD_chargeSum_north_%s.pdf",outdir.c_str(),saven.c_str()));
+  c_ADC_sum_n->SaveAs(Form("%s/MBD_chargeSum_north_%s.pdf",outdir.c_str(),saven.c_str()));
   
   TCanvas* c_ADC_corr = new TCanvas("c_ADC_corr","",700,700);
   c_ADC_corr->SetLogz();
