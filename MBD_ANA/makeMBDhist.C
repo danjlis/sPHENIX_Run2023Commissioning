@@ -40,8 +40,8 @@ void makeMBDhist::Loop(int ievt)
 
    h_ADC_sum_s = new TH1D("h_ADC_sum_s",";Charge sum (south);Counts",nADCbins,xADCmin,xADCmax*20);
    h_ADC_sum_n = new TH1D("h_ADC_sum_n",";Charge sum (north);Counts",nADCbins,xADCmin,xADCmax*20);
-   h_ADC_corr = new TH2D("h_ADC_corr",";Charge sum (north); Charge sum (south)",nADCbins,0,xADCmax*20,nADCbins,0,xADCmax*20);
-   h_ADC_corr_pedcut = new TH2D("h_ADC_corr_pedcut",";Charge sum (north); Charge sum (south)",nADCbins,0,xADCmax*20,nADCbins,0,xADCmax*20);
+   h_ADC_corr = new TH2D("h_ADC_corr",";Charge sum (north); Charge sum (south)",nADCbins/2,0,xADCmax*20,nADCbins,0,xADCmax*20);
+   h_ADC_corr_pedcut = new TH2D("h_ADC_corr_pedcut",";Charge sum (north); Charge sum (south)",nADCbins/2,0,xADCmax*20,nADCbins,0,xADCmax*20);
 
    Long64_t nbytes = 0, nb = 0;
    std::pair<int,int> adc_ch;
@@ -54,6 +54,7 @@ void makeMBDhist::Loop(int ievt)
    double tdcsum_n; 
    double tdcsum_n_sub, tdcsum_s_sub;
    int tdc_count_n_sub, tdc_count_s_sub;
+   int goodevt=0;
      
    for (Long64_t jentry=evt_start; jentry<evt_end;jentry++){
       Long64_t ientry = LoadTree(jentry);
@@ -103,11 +104,11 @@ void makeMBDhist::Loop(int ievt)
         tdcsum_n += tdc_ch[ich];
         tdcsum_s += tdc_ch[ich+nChannels];
 //        std::cout << tdcsum_s << ", " <<tdcsum_n<<std::endl
-        if(tdc_ch[ich]>200){
+        if(tdc_ch[ich]>500){
           tdcsum_n_sub += tdc_ch[ich];
           tdc_count_n_sub ++;
         }
-        if(tdc_ch[ich+nChannels]>200){
+        if(tdc_ch[ich+nChannels]>500){
           tdcsum_s_sub += tdc_ch[ich+nChannels];
           tdc_count_s_sub ++;
         }
@@ -127,7 +128,9 @@ void makeMBDhist::Loop(int ievt)
       h_ADC_corr->Fill(sumadc_n,sumadc_s);
       if(sumadc_n>adccoincut && sumadc_s>adccoincut){
         h_ADC_corr_pedcut->Fill(sumadc_n,sumadc_s);
-        //std::cout << "event number : " << jentry << std::endl;
+        if(goodevt>20) continue;
+        std::cout << "event number : " << jentry << std::endl;
+        goodevt++;
       }
    }
 
@@ -183,12 +186,57 @@ std::pair<int,int> makeMBDhist::MBD_ChannelMap(int ich)
 };
 
 double makeMBDhist::TDC_PeakVal(int i, int ich){
-  int scan_start = 5;
+  int scan_start = 4;
   int scan_end= 31;
+  fChain->GetEntry(i);
   double tdc_start = adc[ich][scan_start];
   double tdc_ret = tdc_start;
+  int ichsel = scan_start;
   for(int is=scan_start; is<scan_end; is++){
-    if(adc[ich][is]>tdc_ret) tdc_ret = adc[ich][is]-pedestal[ich];
+    if(adc[ich][is]>tdc_ret){
+      tdc_ret = adc[ich][is];
+      ichsel = is;
+    }
   }
-  return tdc_ret;
+  return tdc_ret - pedestal[ich];
+};
+
+void makeMBDhist::EventDisplay(int ievt)
+{
+  Long64_t nbytes = 0, nb = 0;
+  for(int ic=0; ic<nChannels; ic++){
+    h_waveform_ADC_s[ic] = new TH1D(Form("h_ADC_waveform_s_event%d_ch%d",ievt,ic),";Sample;ADC",nSamples,0,nSamples);
+    h_waveform_TDC_s[ic] = new TH1D(Form("h_TDC_waveform_s_event%d_ch%d",ievt,ic),";Sample;ADC",nSamples,0,nSamples);
+    h_waveform_ADC_n[ic] = new TH1D(Form("h_ADC_waveform_n_event%d_ch%d",ievt,ic),";Sample;ADC",nSamples,0,nSamples);
+    h_waveform_TDC_n[ic] = new TH1D(Form("h_TDC_waveform_n_event%d_ch%d",ievt,ic),";Sample;ADC",nSamples,0,nSamples);
+  }
+  
+  std::pair<int,int> adc_ch;
+  int ichannel = -1;
+  vector<float> tdc_ch(128);
+  double adc_pedsub = 0;
+  double tdc_val = 0;
+  for(Long64_t jentry=ievt; jentry<ievt+1;jentry++){
+    Long64_t ientry = LoadTree(jentry);
+    if (ientry < 0) break;
+    nb = fChain->GetEntry(jentry);
+
+    for(int il = 0; il<adcloop; il++){
+      adc_ch = MBD_ChannelMap(il);
+      ichannel = adc_ch.second;
+      if(adc_ch.first==0){
+        tdc_val = TDC_PeakVal(jentry,il);
+        tdc_ch[ichannel] = tdc_val;
+        for(int isample=0; isample<nSamples;isample++){
+          (ichannel<ch_ns_div) ? h_waveform_TDC_n[ichannel] -> SetBinContent(isample+1, adc[il][isample]) : h_waveform_TDC_s[ichannel-nChannels] -> SetBinContent(isample+1, adc[il][isample]);
+        }
+      }
+      else if(adc_ch.first==1){
+        adc_pedsub = peak[il]-pedestal[il];
+        for(int isample=0; isample<nSamples;isample++){
+          (ichannel < ch_ns_div) ? h_waveform_ADC_n[ichannel] -> SetBinContent(isample+1,adc[il][isample]) : h_waveform_ADC_s[ichannel-nChannels] -> SetBinContent(isample+1,adc[il][isample]);
+        }
+      }
+    }
+  }
 };

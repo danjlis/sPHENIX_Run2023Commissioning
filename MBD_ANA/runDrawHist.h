@@ -56,5 +56,4 @@ void SetCanvasStyle(TCanvas* c, TH1* h)
   drawText("Au+Au #sqrt{s_{NN}}=200 GeV",col_x,col_y,1,col_textsize);
 }
 
-
 #endif

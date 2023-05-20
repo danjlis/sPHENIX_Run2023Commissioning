@@ -72,9 +72,11 @@ public :
    virtual void     Loop(int ievt);
    virtual Bool_t   Notify();
    virtual void     Show(Long64_t entry = -1);
+   virtual void EventDisplay(int ievt);
+
+protected :
    virtual std::pair<int,int> MBD_ChannelMap(int ich);
    double TDC_PeakVal(int i, int ich);
-
    map<TString,TH1D*> h_ADC_s;
    map<TString,TH1D*> h_ADC_n;
    map<TString,TH1D*> h_TDC_s;
@@ -106,7 +108,7 @@ public :
    double xTDCdiffmin = -1000;
    double xTDCdiffmax = 1000;
    const int adcloop = 256;
-   double adccoincut=20e3;
+   double adccoincut=30e3;
 
    const int nSamples = 31;
 

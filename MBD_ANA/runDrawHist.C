@@ -206,7 +206,7 @@ void runDrawHist(int i=2, bool drawonly=false)
   TLegend* leg_tdc_avg_diff = new TLegend(legx1,legy1,legx2,legy2);
   SetLegendStyle(leg_tdc_avg_diff);
   leg_tdc_avg_diff->SetHeader(infotext.c_str());
-  leg_tdc_avg_diff->AddEntry(h_TDC_diff_avg,"TDC diff. avg. north","pe");
+  leg_tdc_avg_diff->AddEntry(h_TDC_diff_avg,"TDC diff. avg.","pe");
   leg_tdc_avg_diff->Draw("same");
   c_TDC_diff_avg->SaveAs(Form("%s/TDC_diff_avg_%s.pdf",outdir.c_str(),saven.c_str()));
 
@@ -236,7 +236,7 @@ void runDrawHist(int i=2, bool drawonly=false)
   TLegend* leg_tdc_avg_diff_pedcut = new TLegend(legx1,legy1,legx2,legy2);
   SetLegendStyle(leg_tdc_avg_diff_pedcut);
   leg_tdc_avg_diff_pedcut->SetHeader(infotext.c_str());
-  leg_tdc_avg_diff_pedcut->AddEntry(h_TDC_diff_avg_pedcut,"TDC diff. avg. ped. sub. north","pe");
+  leg_tdc_avg_diff_pedcut->AddEntry(h_TDC_diff_avg_pedcut,"TDC diff. avg. ped. sub.","pe");
   leg_tdc_avg_diff_pedcut->Draw("same");
   c_TDC_diff_avg_pedcut->SaveAs(Form("%s/TDC_diff_avg_pedcut_%s.pdf",outdir.c_str(),saven.c_str()));
 
@@ -342,3 +342,96 @@ void runDrawHist(int i=2, bool drawonly=false)
     c_waveform_n->SaveAs(Form("%s/Waveform_north_%s.pdf",outdir.c_str(),saven.c_str()));
   }
 } 
+
+void eventDisplay(int i=2){
+  makeMBDhist t;
+  t.EventDisplay(i);
+
+  const int nChannels = 64;
+  string outdir = "plots";
+  outdir += Form("/Run%d",RunNumber);
+  void * dirf = gSystem->OpenDirectory(outdir.c_str());
+  if(dirf) gSystem->FreeDirectory(dirf);
+  else {gSystem->mkdir(outdir.c_str(), kTRUE);}
+  TH1D* h_waveform_ADC_s[nChannels];
+  TH1D* h_waveform_ADC_n[nChannels];
+  TH1D* h_waveform_TDC_s[nChannels];
+  TH1D* h_waveform_TDC_n[nChannels];
+
+  for(int ic=0; ic<nChannels;ic++){
+      h_waveform_ADC_s[ic] = (TH1D*) gROOT->FindObject(Form("h_ADC_waveform_s_event%d_ch%d",i,ic));
+      h_waveform_ADC_n[ic] = (TH1D*) gROOT->FindObject(Form("h_ADC_waveform_n_event%d_ch%d",i,ic));
+      h_waveform_TDC_s[ic] = (TH1D*) gROOT->FindObject(Form("h_TDC_waveform_s_event%d_ch%d",i,ic));
+      h_waveform_TDC_n[ic] = (TH1D*) gROOT->FindObject(Form("h_TDC_waveform_n_event%d_ch%d",i,ic));
+  }
+
+  string strevt = Form("Event %d",i);
+  string saven = Form("event%d",i);
+  saven += Form("_Run%d",RunNumber);
+
+  string infotext = Form("#bf{%s} Run%d, %s",str_date.c_str(),RunNumber,strevt.c_str());
+
+  gStyle->SetOptStat(0);
+
+  TCanvas* c_waveform_s = new TCanvas("c_waveform_s","",1600,800);
+  TPad* pad1 = new TPad("pad1","",0,0,0.5,0.95);
+  TPad* pad2 = new TPad("pad2","",0.5,0,1,0.95);
+  pad1->Divide(8,8);
+  pad2->Divide(8,8);
+  c_waveform_s->cd();
+  pad1->Draw();
+  pad2->Draw();
+  drawText("#bf{North}",sphenix_x-xshift[0],sphenix_y_shift,1,sphenix_textsize);
+  drawText("#bf{ADC} waveform",sphenix_x-xshift[1],sphenix_y_shift,1,sphenix_textsize);
+  drawText(infotext.c_str(),sphenix_x+xshift[2],sphenix_y_shift,1,sphenix_textsize);
+  drawText("#bf{TDC} waveform",col_x-xshift[3],col_y_shift,1,col_textsize);
+  drawText("#bf{#it{sPHENIX}} Internal",sphenix_x+xshift[4],sphenix_y_shift,1,sphenix_textsize);
+  drawText("Au+Au #sqrt{s_{NN}}=200 GeV",col_x+xshift[5],col_y_shift,1,col_textsize);
+  for(int ich=0; ich<nChannels; ich++){
+    pad1->cd(ich+1);
+    h_waveform_ADC_s[ich]->GetYaxis()->SetLimits(adcmin,adcmax);
+    h_waveform_ADC_s[ich]->GetYaxis()->SetRangeUser(adcmin,adcmax);
+    h_waveform_ADC_s[ich]->Draw();
+
+    pad2->cd(ich+1);
+    h_waveform_TDC_s[ich]->GetYaxis()->SetLimits(tdcmin, tdcmax);
+    h_waveform_TDC_s[ich]->GetYaxis()->SetRangeUser(tdcmin, tdcmax);
+    h_waveform_TDC_s[ich]->Draw();
+  }
+  pad1->Update();
+  pad2->Update();
+  c_waveform_s->Update();
+  c_waveform_s->SaveAs(Form("%s/Waveform_south_%s.pdf",outdir.c_str(),saven.c_str()));
+
+  TCanvas* c_waveform_n = new TCanvas("c_waveform_n","",1600,800);
+  TPad* padn1 = new TPad("padn1","",0,0,0.5,0.95);
+  TPad* padn2 = new TPad("padn2","",0.5,0,1,0.95);
+  padn1->Divide(8,8);
+  padn2->Divide(8,8);
+  c_waveform_n->cd();
+  drawText("#bf{South}",sphenix_x-xshift[0],sphenix_y_shift,1,sphenix_textsize);
+  drawText("#bf{ADC} waveform",sphenix_x-xshift[1],sphenix_y_shift,1,sphenix_textsize);
+  drawText(infotext.c_str(),sphenix_x+xshift[2],sphenix_y_shift,1,sphenix_textsize);
+  drawText("#bf{TDC} waveform",col_x-xshift[3],col_y_shift,1,col_textsize);
+  drawText("#bf{#it{sPHENIX}} Internal",sphenix_x+xshift[4],sphenix_y_shift,1,sphenix_textsize);
+  drawText("Au+Au #sqrt{s_{NN}}=200 GeV",col_x+xshift[5],col_y_shift,1,col_textsize);
+  padn1->Draw();
+  padn2->Draw();
+  for(int ich=0; ich<nChannels; ich++){
+    padn1->cd(ich+1);
+    h_waveform_ADC_n[ich]->GetYaxis()->SetLimits(adcmin,adcmax);
+    h_waveform_ADC_n[ich]->GetYaxis()->SetRangeUser(adcmin,adcmax);
+    h_waveform_ADC_n[ich]->Draw();
+
+    padn2->cd(ich+1);
+    h_waveform_TDC_n[ich]->GetYaxis()->SetLimits(tdcmin, tdcmax);
+    h_waveform_TDC_n[ich]->GetYaxis()->SetRangeUser(tdcmin, tdcmax);
+    h_waveform_TDC_n[ich]->Draw();
+  }
+  padn1->Update();
+  padn2->Update();
+  c_waveform_n->Update();
+  c_waveform_n->cd();
+  c_waveform_n->Modified();
+  c_waveform_n->SaveAs(Form("%s/Waveform_north_%s.pdf",outdir.c_str(),saven.c_str()));
+}
