@@ -9,7 +9,6 @@ TH1D* h_waveform;
 TCanvas* c_waveform;
 
 int channelsel= 20;
-string str_date = "05/18/2023";
 
 double text_etax = 0.5;
 double text_etay = 0.5;
