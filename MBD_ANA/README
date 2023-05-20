@@ -1,0 +1,5 @@
+To make plots do
+./getPlots.sh 
+
+The drawOnly option in default is 0 
+"i" variable for pickup specific event (-1 means loop over all events)
