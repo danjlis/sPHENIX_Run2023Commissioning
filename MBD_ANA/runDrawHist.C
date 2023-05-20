@@ -23,6 +23,7 @@ void runDrawHist(int i=2, bool drawonly=false)
   //gROOT->ProcessLine("SetsPhenixStyle()");
 
   string outdir = "plots";
+  outdir += Form("/Run%d",RunNumber);
   void * dirf = gSystem->OpenDirectory(outdir.c_str());
   if(dirf) gSystem->FreeDirectory(dirf);
   else {gSystem->mkdir(outdir.c_str(), kTRUE);}
