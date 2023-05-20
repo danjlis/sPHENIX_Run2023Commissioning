@@ -218,14 +218,14 @@ void runDrawHist(int i=2, bool drawonly=false)
     pad1->Divide(8,8);
     pad2->Divide(8,8);
     c_waveform_s->cd();
-    drawText("#bf{North}",sphenix_x-xshift[0],sphenix_y,1,sphenix_textsize);
-    drawText("#bf{ADC} waveform",sphenix_x-xshift[1],sphenix_y,1,sphenix_textsize);
-    drawText(infotext,sphenix_x+xshift[2],sphenix_y,1,sphenix_textsize);
-    drawText("#bf{TDC} waveform",col_x-xshift[3],col_y,1,col_textsize);
-    drawText("#bf{#it{sPHENIX}} Internal",sphenix_x+xshift[4],sphenix_y,1,sphenix_textsize);
-    drawText("Au+Au #sqrt{s_{NN}}=200 GeV",col_x+xshift[5],col_y,1,col_textsize);
     pad1->Draw();
     pad2->Draw();
+    drawText("#bf{North}",sphenix_x-xshift[0],sphenix_y_shift,1,sphenix_textsize);
+    drawText("#bf{ADC} waveform",sphenix_x-xshift[1],sphenix_y_shift,1,sphenix_textsize);
+    drawText(infotext,sphenix_x+xshift[2],sphenix_y_shift,1,sphenix_textsize);
+    drawText("#bf{TDC} waveform",col_x-xshift[3],col_y_shift,1,col_textsize);
+    drawText("#bf{#it{sPHENIX}} Internal",sphenix_x+xshift[4],sphenix_y_shift,1,sphenix_textsize);
+    drawText("Au+Au #sqrt{s_{NN}}=200 GeV",col_x+xshift[5],col_y_shift,1,col_textsize);
     for(int ich=0; ich<nChannels; ich++){
       pad1->cd(ich+1);
       h_waveform_ADC_s[ich]->GetYaxis()->SetLimits(adcmin,adcmax);
