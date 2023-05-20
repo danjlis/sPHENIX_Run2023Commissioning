@@ -41,6 +41,14 @@ void runDrawHist(int i=2, bool drawonly=false)
   TH1D* h_TDC_diff[nChannels];
   TH1D* h_TDC_diff_pedcut[nChannels];
 
+  TH1D* h_TDC_avg_s = (TH1D*) rf->Get("h_TDC_avg_s");
+  TH1D* h_TDC_avg_n = (TH1D*) rf->Get("h_TDC_avg_n");
+  TH1D* h_TDC_diff_avg = (TH1D*) rf->Get("h_TDC_diff_avg");
+
+  TH1D* h_TDC_avg_s_pedcut = (TH1D*) rf->Get("h_TDC_avg_s_pedcut");
+  TH1D* h_TDC_avg_n_pedcut = (TH1D*) rf->Get("h_TDC_avg_n_pedcut");
+  TH1D* h_TDC_diff_avg_pedcut = (TH1D*) rf->Get("h_TDC_diff_avg_pedcut");
+
   TH1D* h_waveform_ADC_s[nChannels];
   TH1D* h_waveform_ADC_n[nChannels];
   TH1D* h_waveform_TDC_s[nChannels];
@@ -66,7 +74,7 @@ void runDrawHist(int i=2, bool drawonly=false)
   string saven = (isPickupEvt) ? Form("event%d",i) : "eventAll";
   saven += Form("_Run%d",RunNumber);
 
-  const char* infotext = Form("#bf{%s} Run%d, %s",str_date.c_str(),RunNumber,strevt.c_str());
+  string infotext = Form("#bf{%s} Run%d, %s",str_date.c_str(),RunNumber,strevt.c_str());
 
 
   gStyle->SetOptStat(0);
@@ -75,7 +83,7 @@ void runDrawHist(int i=2, bool drawonly=false)
   SetCanvasStyle(c_ADC_sum_s,h_ADC_sum_s);
   TLegend* leg_s = new TLegend(legx1,legy1,legx2,legy2);
   SetLegendStyle(leg_s);
-  leg_s->SetHeader(infotext);
+  leg_s->SetHeader(infotext.c_str());
   leg_s->AddEntry(h_ADC_sum_s,"MBD charge south","pe");
   leg_s->Draw("same");
   c_ADC_sum_s->SaveAs(Form("%s/MBD_chargeSum_south_%s.pdf",outdir.c_str(),saven.c_str()));
@@ -84,7 +92,7 @@ void runDrawHist(int i=2, bool drawonly=false)
   SetCanvasStyle(c_ADC_sum_n,h_ADC_sum_n);
   TLegend* leg_n = new TLegend(legx1,legy1,legx2,legy2);
   SetLegendStyle(leg_n);
-  leg_n->SetHeader(infotext);
+  leg_n->SetHeader(infotext.c_str());
   leg_n->AddEntry(h_ADC_sum_n,"MBD charge north","pe");
   leg_n->Draw("same");
   c_ADC_sum_n->SaveAs(Form("%s/MBD_chargeSum_north_%s.pdf",outdir.c_str(),saven.c_str()));
@@ -98,7 +106,7 @@ void runDrawHist(int i=2, bool drawonly=false)
   drawText("Au+Au #sqrt{s_{NN}}=200 GeV",col_x,col_y,1,col_textsize);
   TLegend* leg_corr = new TLegend(legx1,legy1,legx2,legy2);
   SetLegendStyle(leg_corr);
-  leg_corr->SetHeader(infotext);
+  leg_corr->SetHeader(infotext.c_str());
   leg_corr->Draw("same");
   c_ADC_corr->SaveAs(Form("%s/MBD_chargeSum_corr_%s.pdf",outdir.c_str(),saven.c_str()));
 
@@ -118,7 +126,7 @@ void runDrawHist(int i=2, bool drawonly=false)
   c_TDC_s->cd();
   pad_tdcs->Draw();
   drawText("#bf{South - TDC}",sphenix_x-xshift_sq[0],sphenix_y+yshift,1,sphenix_textsize_sq);
-  drawText(infotext,sphenix_x+xshift_sq[1],sphenix_y+yshift,1,sphenix_textsize_sq);
+  drawText(infotext.c_str(),sphenix_x+xshift_sq[1],sphenix_y+yshift,1,sphenix_textsize_sq);
   drawText("#bf{#it{sPHENIX}} Internal",col_x+xshift_sq[2],col_y+yshift,1,col_textsize_sq);
   drawText("Au+Au #sqrt{s_{NN}}=200 GeV",col_x+xshift_sq[3],col_y+yshift,1,col_textsize_sq);
   for(int ic=0;ic<nChannels;ic++){
@@ -137,7 +145,7 @@ void runDrawHist(int i=2, bool drawonly=false)
   c_TDC_n->cd();
   pad_tdcn->Draw();
   drawText("#bf{North - TDC}",sphenix_x-xshift_sq[0],sphenix_y+yshift,1,sphenix_textsize_sq);
-  drawText(infotext,sphenix_x+xshift_sq[1],sphenix_y+yshift,1,sphenix_textsize_sq);
+  drawText(infotext.c_str(),sphenix_x+xshift_sq[1],sphenix_y+yshift,1,sphenix_textsize_sq);
   drawText("#bf{#it{sPHENIX}} Internal",col_x+xshift_sq[2],col_y+yshift,1,col_textsize_sq);
   drawText("Au+Au #sqrt{s_{NN}}=200 GeV",col_x+xshift_sq[3],col_y+yshift,1,col_textsize_sq);
   for(int ic=0;ic<nChannels;ic++){
@@ -172,6 +180,65 @@ void runDrawHist(int i=2, bool drawonly=false)
     c_TDC_diff_pedcut->Modified();
   }
   c_TDC_diff_pedcut->SaveAs(Form("%s/TDC_diff_pedcut_%s.pdf",outdir.c_str(),saven.c_str()));
+  
+  TCanvas* c_TDC_avg_s = new TCanvas("c_TDC_avg_s","",700,700);
+  SetCanvasStyle(c_TDC_avg_s,h_TDC_avg_s);
+  TLegend* leg_tdc_avg_s = new TLegend(legx1,legy1,legx2,legy2);
+  SetLegendStyle(leg_tdc_avg_s);
+  leg_tdc_avg_s->SetHeader(infotext.c_str());
+  leg_tdc_avg_s->AddEntry(h_TDC_avg_s,"TDC avg. south","pe");
+  leg_tdc_avg_s->Draw("same");
+  c_TDC_avg_s->SaveAs(Form("%s/TDC_avg_s_%s.pdf",outdir.c_str(),saven.c_str()));
+  
+  TCanvas* c_TDC_avg_n = new TCanvas("c_TDC_avg_n","",700,700);
+  SetCanvasStyle(c_TDC_avg_n,h_TDC_avg_n);
+  TLegend* leg_tdc_avg_n = new TLegend(legx1,legy1,legx2,legy2);
+  SetLegendStyle(leg_tdc_avg_n);
+  leg_tdc_avg_n->SetHeader(infotext.c_str());
+  leg_tdc_avg_n->AddEntry(h_TDC_avg_n,"TDC avg. north","pe");
+  leg_tdc_avg_n->Draw("same");
+  c_TDC_avg_n->SaveAs(Form("%s/TDC_avg_n_%s.pdf",outdir.c_str(),saven.c_str()));
+
+  TCanvas* c_TDC_diff_avg = new TCanvas("c_TDC_diff_avg","",700,700);
+  SetCanvasStyle(c_TDC_diff_avg,h_TDC_diff_avg);
+  h_TDC_diff_avg->GetYaxis()->SetLimits(1,10e5);
+  h_TDC_diff_avg->GetYaxis()->SetRangeUser(1,10e5);
+  TLegend* leg_tdc_avg_diff = new TLegend(legx1,legy1,legx2,legy2);
+  SetLegendStyle(leg_tdc_avg_diff);
+  leg_tdc_avg_diff->SetHeader(infotext.c_str());
+  leg_tdc_avg_diff->AddEntry(h_TDC_diff_avg,"TDC diff. avg. north","pe");
+  leg_tdc_avg_diff->Draw("same");
+  c_TDC_diff_avg->SaveAs(Form("%s/TDC_diff_avg_%s.pdf",outdir.c_str(),saven.c_str()));
+
+  TCanvas* c_TDC_avg_s_pedcut = new TCanvas("c_TDC_avg_s_pedcut","",700,700);
+  SetCanvasStyle(c_TDC_avg_s_pedcut,h_TDC_avg_s_pedcut);
+  TLegend* leg_tdc_avg_s_pedcut = new TLegend(legx1,legy1,legx2,legy2);
+  SetLegendStyle(leg_tdc_avg_s_pedcut);
+  leg_tdc_avg_s_pedcut->SetHeader(infotext.c_str());
+  leg_tdc_avg_s_pedcut->AddEntry(h_TDC_avg_s_pedcut,"TDC avg. ped. sub. south","pe");
+  leg_tdc_avg_s_pedcut->Draw("same");
+  c_TDC_avg_s_pedcut->SaveAs(Form("%s/TDC_avg_s_pedcut_%s.pdf",outdir.c_str(),saven.c_str()));
+  
+  TCanvas* c_TDC_avg_n_pedcut = new TCanvas("c_TDC_avg_n_pedcut","",700,700);
+  SetCanvasStyle(c_TDC_avg_n_pedcut,h_TDC_avg_n_pedcut);
+  TLegend* leg_tdc_avg_n_pedcut = new TLegend(legx1,legy1,legx2,legy2);
+  SetLegendStyle(leg_tdc_avg_n_pedcut);
+  leg_tdc_avg_n_pedcut->SetHeader(infotext.c_str());
+  leg_tdc_avg_n_pedcut->AddEntry(h_TDC_avg_n_pedcut,"TDC avg. ped. sub. north","pe");
+  leg_tdc_avg_n_pedcut->Draw("same");
+  c_TDC_avg_n_pedcut->SaveAs(Form("%s/TDC_avg_n_pedcut_%s.pdf",outdir.c_str(),saven.c_str()));
+  infotext = Form("#bf{%s} Run%d, %s",str_date.c_str(),RunNumber,strevt.c_str());
+  
+  TCanvas* c_TDC_diff_avg_pedcut = new TCanvas("c_TDC_diff_avg_pedcut","",700,700);
+  SetCanvasStyle(c_TDC_diff_avg_pedcut,h_TDC_diff_avg_pedcut);
+  h_TDC_diff_avg_pedcut->GetYaxis()->SetLimits(1,10e5);
+  h_TDC_diff_avg_pedcut->GetYaxis()->SetRangeUser(1,10e5);
+  TLegend* leg_tdc_avg_diff_pedcut = new TLegend(legx1,legy1,legx2,legy2);
+  SetLegendStyle(leg_tdc_avg_diff_pedcut);
+  leg_tdc_avg_diff_pedcut->SetHeader(infotext.c_str());
+  leg_tdc_avg_diff_pedcut->AddEntry(h_TDC_diff_avg_pedcut,"TDC diff. avg. ped. sub. north","pe");
+  leg_tdc_avg_diff_pedcut->Draw("same");
+  c_TDC_diff_avg_pedcut->SaveAs(Form("%s/TDC_diff_avg_pedcut_%s.pdf",outdir.c_str(),saven.c_str()));
 
   TCanvas* c_ADC_s = new TCanvas("c_ADC_s","",800,800);
   TPad* pad_adcs = new TPad("pad_adcs","",0,0,1,0.95);
@@ -179,7 +246,7 @@ void runDrawHist(int i=2, bool drawonly=false)
   c_ADC_s->cd();
   pad_adcs->Draw();
   drawText("#bf{South - ADC}",sphenix_x-xshift_sq[0],sphenix_y+yshift,1,sphenix_textsize_sq);
-  drawText(infotext,sphenix_x+xshift_sq[1],sphenix_y+yshift,1,sphenix_textsize_sq);
+  drawText(infotext.c_str(),sphenix_x+xshift_sq[1],sphenix_y+yshift,1,sphenix_textsize_sq);
   drawText("#bf{#it{sPHENIX}} Internal",col_x+xshift_sq[2],col_y+yshift,1,col_textsize_sq);
   drawText("Au+Au #sqrt{s_{NN}}=200 GeV",col_x+xshift_sq[3],col_y+yshift,1,col_textsize_sq);
   for(int ic=0;ic<nChannels;ic++){
@@ -197,7 +264,7 @@ void runDrawHist(int i=2, bool drawonly=false)
   pad_adcn->Divide(8,8);
   c_ADC_n->cd();
   drawText("#bf{North - ADC}",sphenix_x-xshift_sq[0],sphenix_y+yshift,1,sphenix_textsize_sq);
-  drawText(infotext,sphenix_x+xshift_sq[1],sphenix_y+yshift,1,sphenix_textsize_sq);
+  drawText(infotext.c_str(),sphenix_x+xshift_sq[1],sphenix_y+yshift,1,sphenix_textsize_sq);
   drawText("#bf{#it{sPHENIX}} Internal",col_x+xshift_sq[2],col_y+yshift,1,col_textsize_sq);
   drawText("Au+Au #sqrt{s_{NN}}=200 GeV",col_x+xshift_sq[3],col_y+yshift,1,col_textsize_sq);
   pad_adcn->Draw();
@@ -222,7 +289,7 @@ void runDrawHist(int i=2, bool drawonly=false)
     pad2->Draw();
     drawText("#bf{North}",sphenix_x-xshift[0],sphenix_y_shift,1,sphenix_textsize);
     drawText("#bf{ADC} waveform",sphenix_x-xshift[1],sphenix_y_shift,1,sphenix_textsize);
-    drawText(infotext,sphenix_x+xshift[2],sphenix_y_shift,1,sphenix_textsize);
+    drawText(infotext.c_str(),sphenix_x+xshift[2],sphenix_y_shift,1,sphenix_textsize);
     drawText("#bf{TDC} waveform",col_x-xshift[3],col_y_shift,1,col_textsize);
     drawText("#bf{#it{sPHENIX}} Internal",sphenix_x+xshift[4],sphenix_y_shift,1,sphenix_textsize);
     drawText("Au+Au #sqrt{s_{NN}}=200 GeV",col_x+xshift[5],col_y_shift,1,col_textsize);
@@ -250,7 +317,7 @@ void runDrawHist(int i=2, bool drawonly=false)
     c_waveform_n->cd();
     drawText("#bf{South}",sphenix_x-xshift[0],sphenix_y_shift,1,sphenix_textsize);
     drawText("#bf{ADC} waveform",sphenix_x-xshift[1],sphenix_y_shift,1,sphenix_textsize);
-    drawText(infotext,sphenix_x+xshift[2],sphenix_y_shift,1,sphenix_textsize);
+    drawText(infotext.c_str(),sphenix_x+xshift[2],sphenix_y_shift,1,sphenix_textsize);
     drawText("#bf{TDC} waveform",col_x-xshift[3],col_y_shift,1,col_textsize);
     drawText("#bf{#it{sPHENIX}} Internal",sphenix_x+xshift[4],sphenix_y_shift,1,sphenix_textsize);
     drawText("Au+Au #sqrt{s_{NN}}=200 GeV",col_x+xshift[5],col_y_shift,1,col_textsize);

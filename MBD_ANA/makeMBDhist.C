@@ -29,6 +29,14 @@ void makeMBDhist::Loop(int ievt)
        h_waveform_TDC_n[ic] = new TH1D(Form("h_TDC_waveform_n_event%d_ch%d",ievt,ic),";Sample;ADC",nSamples,0,nSamples);
      }
    }
+   
+   h_TDC_avg_s = new TH1D("h_TDC_avg_s",";TDC^{avg}_{south};Counts",nTDCbins/2,xTDCmin,xTDCmax*1.5);
+   h_TDC_avg_n = new TH1D("h_TDC_avg_n",";TDC^{avg}_{north};Counts",nTDCbins/2,xTDCmin,xTDCmax*1.5);
+   h_TDC_diff_avg = new TH1D("h_TDC_diff_avg",";TDC^{avg}_{north}-TDC^{avg}_{south};Counts",nTDCbins/4,xTDCdiffmin,xTDCdiffmax);
+
+   h_TDC_avg_s_pedcut = new TH1D("h_TDC_avg_s_pedcut",";TDC^{avg}_{south};Counts",nTDCbins/2,xTDCmin,xTDCmax*1.5);
+   h_TDC_avg_n_pedcut = new TH1D("h_TDC_avg_n_pedcut",";TDC^{avg}_{north};Counts",nTDCbins/2,xTDCmin,xTDCmax*1.5);
+   h_TDC_diff_avg_pedcut = new TH1D("h_TDC_diff_avg_pedcut",";TDC^{avg}_{north}-TDC^{avg}_{south};Counts",nTDCbins/4,xTDCdiffmin,xTDCdiffmax);
 
    h_ADC_sum_s = new TH1D("h_ADC_sum_s",";Charge sum (south);Counts",nADCbins,xADCmin,xADCmax*20);
    h_ADC_sum_n = new TH1D("h_ADC_sum_n",";Charge sum (north);Counts",nADCbins,xADCmin,xADCmax*20);
@@ -42,12 +50,17 @@ void makeMBDhist::Loop(int ievt)
    int ichannel = -1;
    double sumadc_n =-1;double sumadc_s=-1;
    vector<float> tdc_ch(128);
+   double tdcsum_s; 
+   double tdcsum_n; 
+   double tdcsum_n_sub, tdcsum_s_sub;
+   int tdc_count_n_sub, tdc_count_s_sub;
+     
    for (Long64_t jentry=evt_start; jentry<evt_end;jentry++){
       Long64_t ientry = LoadTree(jentry);
       if (ientry < 0) break;
       nb = fChain->GetEntry(jentry);   nbytes += nb;
 
-      sumadc_n=0; sumadc_s=0;
+      sumadc_n=0; sumadc_s=0; tdcsum_s=0; tdcsum_n=0;tdcsum_n_sub=0;tdcsum_s_sub=0; tdc_count_n_sub=0; tdc_count_s_sub=0;
       for(int il = 0; il<adcloop; il++){
         adc_ch = MBD_ChannelMap(il);
         ichannel = adc_ch.second;
@@ -87,13 +100,35 @@ void makeMBDhist::Loop(int ievt)
         h_TDC_n[ich]->Fill(tdc_ch[ich]);
         h_TDC_s[ich]->Fill(tdc_ch[ich+nChannels]);
         h_TDC_diff[ich] -> Fill(tdc_ch[ich] - tdc_ch[ich+nChannels]);
-        if(sumadc_n>adccoincut && sumadc_s>adccoincut && tdc_ch[ich]>1200 && tdc_ch[ich+nChannels]>1200) h_TDC_diff_pedcut[ich] -> Fill(tdc_ch[ich] - tdc_ch[ich+nChannels]);
+        tdcsum_n += tdc_ch[ich];
+        tdcsum_s += tdc_ch[ich+nChannels];
+//        std::cout << tdcsum_s << ", " <<tdcsum_n<<std::endl
+        if(tdc_ch[ich]>200){
+          tdcsum_n_sub += tdc_ch[ich];
+          tdc_count_n_sub ++;
+        }
+        if(tdc_ch[ich+nChannels]>200){
+          tdcsum_s_sub += tdc_ch[ich+nChannels];
+          tdc_count_s_sub ++;
+        }
+        if(sumadc_n>adccoincut && sumadc_s>adccoincut && tdc_ch[ich]>200 && tdc_ch[ich+nChannels]>200) h_TDC_diff_pedcut[ich] -> Fill(tdc_ch[ich] - tdc_ch[ich+nChannels]);
       }
+
+      h_TDC_avg_s->Fill(tdcsum_s/nChannels);
+      h_TDC_avg_n->Fill(tdcsum_n/nChannels);
+      h_TDC_diff_avg->Fill(tdcsum_n/nChannels - tdcsum_s/nChannels);
+
+      h_TDC_avg_s_pedcut->Fill(tdcsum_s_sub/tdc_count_s_sub);
+      h_TDC_avg_n_pedcut->Fill(tdcsum_n_sub/tdc_count_n_sub);
+      h_TDC_diff_avg_pedcut->Fill(tdcsum_n_sub/tdc_count_n_sub - tdcsum_s_sub/tdc_count_s_sub);
 
       h_ADC_sum_s->Fill(sumadc_s);
       h_ADC_sum_n->Fill(sumadc_n);
       h_ADC_corr->Fill(sumadc_n,sumadc_s);
-      if(sumadc_n>adccoincut && sumadc_s>adccoincut) h_ADC_corr_pedcut->Fill(sumadc_n,sumadc_s);
+      if(sumadc_n>adccoincut && sumadc_s>adccoincut){
+        h_ADC_corr_pedcut->Fill(sumadc_n,sumadc_s);
+        //std::cout << "event number : " << jentry << std::endl;
+      }
    }
 
    wf->cd();
@@ -101,6 +136,14 @@ void makeMBDhist::Loop(int ievt)
    h_ADC_sum_n->Write();
    h_ADC_corr->Write();
    h_ADC_corr_pedcut->Write();
+
+   h_TDC_avg_n->Write();
+   h_TDC_avg_s->Write();
+   h_TDC_diff_avg->Write();
+   h_TDC_avg_n_pedcut->Write();
+   h_TDC_avg_s_pedcut->Write();
+   h_TDC_diff_avg_pedcut->Write();
+
    for(int ic=0;ic<nChannels;ic++){
      h_ADC_n[ic]->Write();
      h_ADC_s[ic]->Write();
@@ -140,12 +183,12 @@ std::pair<int,int> makeMBDhist::MBD_ChannelMap(int ich)
 };
 
 double makeMBDhist::TDC_PeakVal(int i, int ich){
-  int scan_start = 10;
-  int scan_end= 20;
+  int scan_start = 5;
+  int scan_end= 31;
   double tdc_start = adc[ich][scan_start];
   double tdc_ret = tdc_start;
   for(int is=scan_start; is<scan_end; is++){
-    if(adc[ich][is]>tdc_ret) tdc_ret = adc[ich][is];
+    if(adc[ich][is]>tdc_ret) tdc_ret = adc[ich][is]-pedestal[ich];
   }
   return tdc_ret;
 };

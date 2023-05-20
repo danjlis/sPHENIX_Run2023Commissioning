@@ -82,6 +82,11 @@ public :
    map<TString,TH1D*> h_TDC_diff;
    map<TString,TH1D*> h_TDC_diff_pedcut;
    TH1D* h_TDC_diff_avg;
+   TH1D* h_TDC_avg_s;
+   TH1D* h_TDC_avg_n;
+   TH1D* h_TDC_diff_avg_pedcut;
+   TH1D* h_TDC_avg_s_pedcut;
+   TH1D* h_TDC_avg_n_pedcut;
    TH1D* h_ADC_sum_s;
    TH1D* h_ADC_sum_n;
    TH2D* h_ADC_corr;
@@ -96,12 +101,12 @@ public :
    const int nTDCbins = 500;
    double xADCmin = -10;
    double xADCmax = 10000;
-   double xTDCmin = 0;
-   double xTDCmax = 12000;
+   double xTDCmin = -100;
+   double xTDCmax = 11000;
    double xTDCdiffmin = -1000;
    double xTDCdiffmax = 1000;
    const int adcloop = 256;
-   double adccoincut=7e3;
+   double adccoincut=20e3;
 
    const int nSamples = 31;
 
@@ -112,7 +117,8 @@ public :
    int ch_ns_div = 64;
 
    int runN = RunNumber;
-   string filename = Form("/sphenix/user/dlis/Projects/fit_emcal/root_mbd/calib-0000%d-0000.root",RunNumber);
+   //string filename = Form("/sphenix/user/dlis/Projects/fit_emcal/root_mbd/calib-0000%d-0000.root",RunNumber);
+   string filename = Form("/gpfs/mnt/gpfs02/sphenix/user/jpark4/EMCAL_PRDF/analysis/run/sPHENIX_Run2023Commissioning/MBD_ANA/rootfiles/calib-0000%d-0000.root",RunNumber);
 };
 
 #endif
