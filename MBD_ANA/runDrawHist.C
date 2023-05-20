@@ -248,12 +248,12 @@ void runDrawHist(int i=2, bool drawonly=false)
     padn1->Divide(8,8);
     padn2->Divide(8,8);
     c_waveform_n->cd();
-    drawText("#bf{South}",sphenix_x-xshift[0],sphenix_y,1,sphenix_textsize);
-    drawText("#bf{ADC} waveform",sphenix_x-xshift[1],sphenix_y,1,sphenix_textsize);
-    drawText(infotext,sphenix_x+xshift[2],sphenix_y,1,sphenix_textsize);
-    drawText("#bf{TDC} waveform",col_x-xshift[3],col_y,1,col_textsize);
-    drawText("#bf{#it{sPHENIX}} Internal",sphenix_x+xshift[4],sphenix_y,1,sphenix_textsize);
-    drawText("Au+Au #sqrt{s_{NN}}=200 GeV",col_x+xshift[5],col_y,1,col_textsize);
+    drawText("#bf{South}",sphenix_x-xshift[0],sphenix_y_shift,1,sphenix_textsize);
+    drawText("#bf{ADC} waveform",sphenix_x-xshift[1],sphenix_y_shift,1,sphenix_textsize);
+    drawText(infotext,sphenix_x+xshift[2],sphenix_y_shift,1,sphenix_textsize);
+    drawText("#bf{TDC} waveform",col_x-xshift[3],col_y_shift,1,col_textsize);
+    drawText("#bf{#it{sPHENIX}} Internal",sphenix_x+xshift[4],sphenix_y_shift,1,sphenix_textsize);
+    drawText("Au+Au #sqrt{s_{NN}}=200 GeV",col_x+xshift[5],col_y_shift,1,col_textsize);
     padn1->Draw();
     padn2->Draw();
     for(int ich=0; ich<nChannels; ich++){
