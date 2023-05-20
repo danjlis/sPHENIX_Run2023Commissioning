@@ -11,6 +11,7 @@
 #include <TROOT.h>
 #include <TChain.h>
 #include <TFile.h>
+#include "runinfo.h"
 #include "../Utility/Style_jaebeom.h"
 
 // Header file for the classes stored in the TTree if any.
@@ -79,10 +80,12 @@ public :
    map<TString,TH1D*> h_TDC_s;
    map<TString,TH1D*> h_TDC_n;
    map<TString,TH1D*> h_TDC_diff;
+   map<TString,TH1D*> h_TDC_diff_pedcut;
    TH1D* h_TDC_diff_avg;
    TH1D* h_ADC_sum_s;
    TH1D* h_ADC_sum_n;
    TH2D* h_ADC_corr;
+   TH2D* h_ADC_corr_pedcut;
    TH1D* h_waveform_ADC_s[64];
    TH1D* h_waveform_TDC_s[64];
    TH1D* h_waveform_ADC_n[64];
@@ -90,14 +93,15 @@ public :
 
    const int nChannels = 64;
    const int nADCbins = 800;
-   const int nTDCbins = 400;
+   const int nTDCbins = 500;
    double xADCmin = -10;
    double xADCmax = 10000;
-   double xTDCmin = 1000;
-   double xTDCmax = 6500;
+   double xTDCmin = 0;
+   double xTDCmax = 12000;
    double xTDCdiffmin = -1000;
    double xTDCdiffmax = 1000;
    const int adcloop = 256;
+   double adccoincut=7e3;
 
    const int nSamples = 31;
 
@@ -106,6 +110,9 @@ public :
    int NADC_OFF =8;
    int NOFFSET =16;
    int ch_ns_div = 64;
+
+   int runN = RunNumber;
+   string filename = Form("/sphenix/user/dlis/Projects/fit_emcal/root_mbd/calib-0000%d-0000.root",RunNumber);
 };
 
 #endif
@@ -114,9 +121,9 @@ public :
 makeMBDhist::makeMBDhist(TTree *tree) : fChain(0) 
 {
    if (tree == 0) {
-      TFile *f = (TFile*)gROOT->GetListOfFiles()->FindObject("/sphenix/user/dlis/Projects/fit_emcal/root_mbd/calib-00007009-0000.root");
+      TFile *f = (TFile*)gROOT->GetListOfFiles()->FindObject(filename.c_str());
       if (!f || !f->IsOpen()) {
-         f = new TFile("/sphenix/user/dlis/Projects/fit_emcal/root_mbd/calib-00007009-0000.root");
+         f = new TFile(filename.c_str());
       }
       f->GetObject("W",tree);
 
