@@ -72,6 +72,10 @@ class wd409dataLL1
   int timesum_s[NRSAM];
   int timesum_n[NRSAM];
 
+  int idxsample;
+  int idxhitn;
+  int idxhits;
+
   int summary[NXMIT];
   
   wd409dataLL1() {

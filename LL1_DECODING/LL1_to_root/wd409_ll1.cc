@@ -152,7 +152,7 @@ int wd409_ll1( const char *filename, const char *outputfile )
   branchstring = "nhit_s[";
   branchstring += NRSAM;
   branchstring += "]/I";
-  W.Branch("nhit_n",wd->nhit_s,branchstring);
+  W.Branch("nhit_s",wd->nhit_s,branchstring);
 
   // charge sum
   branchstring = "chargesum_n1[";
@@ -206,6 +206,17 @@ int wd409_ll1( const char *filename, const char *outputfile )
   branchstring += "]/I";
   W.Branch("timesum_s",wd->timesum_s,branchstring);
 
+  // sample index 
+  branchstring = "idxsample";
+  branchstring += "/I";
+  W.Branch("idxsample",&wd->idxsample,branchstring);
+  branchstring = "idxhitn";
+  branchstring += "/I";
+  W.Branch("idxhitn",&wd->idxhitn,branchstring);
+  branchstring = "idxhits";
+  branchstring += "/I";
+  W.Branch("idxhits",&wd->idxhits,branchstring);
+
   // Arrays for Interpolator to work with
 /*  Double_t t[NRSAM], a[NRSAM];
   for ( Int_t i = 0; i < NRSAM; i++ ) {
@@ -231,7 +242,8 @@ int wd409_ll1( const char *filename, const char *outputfile )
         wd->evtnr = p->iValue(0,"EVTNR");
         wd->clock = p->iValue(0,"CLOCK");
 
-        
+        int indx1=0; int inhit1=0; 
+        int indx2=0; int inhit2=0;
         for(int is = 0; is < NRSAM; is++){
           wd->nhit_n1[is] =  p->iValue(is,NHITCHANNEL+NADCSH*0);
           wd->nhit_n2[is] =  p->iValue(is,NHITCHANNEL+NADCSH*1);
@@ -248,6 +260,20 @@ int wd409_ll1( const char *filename, const char *outputfile )
 
           wd->timesum_n[is] = wd->timesum_n1[is] + wd->timesum_n2[is];
           wd->timesum_s[is] = wd->timesum_s1[is] + wd->timesum_s2[is];
+
+          if( wd->nhit_n[is]>0){
+            if(inhit1 <  wd->nhit_n[is]){
+              indx1 = is;
+              inhit1 = wd->nhit_n[is];
+            } 
+          }
+          
+          if( wd->nhit_s[is]>0){
+            if(inhit2 <  wd->nhit_s[is]){
+              indx2 = is;
+              inhit2 = wd->nhit_s[is];
+            } 
+          }
 
           wd->chargesum_n1[is] = 0;
           wd->chargesum_n2[is] = 0;
@@ -269,6 +295,10 @@ int wd409_ll1( const char *filename, const char *outputfile )
             wd->triggerwords[it][is] =  p->iValue(is,it);
           }
         }	
+        wd->idxhitn = indx1;
+        wd->idxhits = indx2;
+
+        wd->idxsample = (wd->idxhitn==wd->idxhits) ? wd->idxhitn : -1;
 
         delete p;
       }
