@@ -245,21 +245,21 @@ int wd409_ll1( const char *filename, const char *outputfile )
         int indx1=0; int inhit1=0; 
         int indx2=0; int inhit2=0;
         for(int is = 0; is < NRSAM; is++){
-          wd->nhit_n1[is] =  p->iValue(is,NHITCHANNEL+NADCSH*0);
-          wd->nhit_n2[is] =  p->iValue(is,NHITCHANNEL+NADCSH*1);
-          wd->nhit_s1[is] =  p->iValue(is,NHITCHANNEL+NADCSH*2);
-          wd->nhit_s2[is] =  p->iValue(is,NHITCHANNEL+NADCSH*3);
+          wd->nhit_s1[is] =  p->iValue(is,NHITCHANNEL+NADCSH*0);
+          wd->nhit_s2[is] =  p->iValue(is,NHITCHANNEL+NADCSH*1);
+          wd->nhit_n1[is] =  p->iValue(is,NHITCHANNEL+NADCSH*2);
+          wd->nhit_n2[is] =  p->iValue(is,NHITCHANNEL+NADCSH*3);
 
           wd->nhit_n[is] = wd->nhit_n1[is] + wd->nhit_n2[is];
           wd->nhit_s[is] = wd->nhit_s1[is] + wd->nhit_s2[is];
           
-          wd->timesum_n1[is] =  p->iValue(is,NHITCHANNEL+1+NADCSH*0);
-          wd->timesum_n2[is] =  p->iValue(is,NHITCHANNEL+2+NADCSH*1);
-          wd->timesum_s1[is] =  p->iValue(is,NHITCHANNEL+3+NADCSH*2);
-          wd->timesum_s2[is] =  p->iValue(is,NHITCHANNEL+4+NADCSH*3);
+          wd->timesum_s1[is] =  p->iValue(is,NHITCHANNEL+1+NADCSH*0);
+          wd->timesum_s2[is] =  p->iValue(is,NHITCHANNEL+2+NADCSH*1);
+          wd->timesum_n1[is] =  p->iValue(is,NHITCHANNEL+3+NADCSH*2);
+          wd->timesum_n2[is] =  p->iValue(is,NHITCHANNEL+4+NADCSH*3);
 
-          wd->timesum_n[is] = wd->timesum_n1[is] + wd->timesum_n2[is];
-          wd->timesum_s[is] = wd->timesum_s1[is] + wd->timesum_s2[is];
+          wd->timesum_s[is] = wd->timesum_n1[is] + wd->timesum_n2[is];
+          wd->timesum_n[is] = wd->timesum_s1[is] + wd->timesum_s2[is];
 
           if( wd->nhit_n[is]>0){
             if(inhit1 <  wd->nhit_n[is]){
@@ -284,15 +284,15 @@ int wd409_ll1( const char *filename, const char *outputfile )
 
           for(int ic = 0; ic <NCH; ic++) {
             wd->channel[ic][is] = p->iValue(is,ic);
-            if(ic>=NADCSH*0 && ic<NHITCHANNEL+NADCSH*0) wd->chargesum_n1[is] += p->iValue(is,ic);
-            else if(ic>=NADCSH*1 && ic<NHITCHANNEL+NADCSH*1) wd->chargesum_n2[is] += p->iValue(is,ic);
-            else if(ic>=NADCSH*2 && ic<NHITCHANNEL+NADCSH*2) wd->chargesum_s1[is] += p->iValue(is,ic);
-            else if(ic>=NADCSH*3 && ic<NHITCHANNEL+NADCSH*3) wd->chargesum_s2[is] += p->iValue(is,ic);
+            if(ic>=NADCSH*0 && ic<NHITCHANNEL+NADCSH*0) wd->chargesum_s1[is] += p->iValue(is,ic);
+            else if(ic>=NADCSH*1 && ic<NHITCHANNEL+NADCSH*1) wd->chargesum_s2[is] += p->iValue(is,ic);
+            else if(ic>=NADCSH*2 && ic<NHITCHANNEL+NADCSH*2) wd->chargesum_n1[is] += p->iValue(is,ic);
+            else if(ic>=NADCSH*3 && ic<NHITCHANNEL+NADCSH*3) wd->chargesum_n2[is] += p->iValue(is,ic);
             wd->chargesum_n[is] = wd->chargesum_n1[is] + wd->chargesum_n2[is];
             wd->chargesum_s[is] = wd->chargesum_s1[is] + wd->chargesum_s2[is];
           }
           for(int it=NCH; it<(NCH+NTRIGWORDS); it++){
-            wd->triggerwords[it][is] =  p->iValue(is,it);
+            wd->triggerwords[it - NCH][is] =  p->iValue(is,it);
           }
         }	
         wd->idxhitn = indx1;

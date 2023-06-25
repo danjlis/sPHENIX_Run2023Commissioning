@@ -1,0 +1,10 @@
+#ifndef runinfo_h
+#define runinfo_h
+
+#include <iostream>
+
+int RunNumberLL1 = 10495;
+int RunNumberMBD = 10495;
+string str_date = "06/11/2023";
+
+#endif

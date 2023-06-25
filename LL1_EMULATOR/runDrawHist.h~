@@ -2,7 +2,7 @@
 #define runDrawHist_h
 
 #include <iostream>
-#include "makeLL1Hist.C"
+#include "makeLL1MBDHist.C"
 
 
 TH1D* h_waveform;
@@ -16,10 +16,10 @@ double text_phix = 0.5;
 double text_phiy = 0.3;
 double text_ex = 0.4;
 double text_ey = 0.6;
-double legx1 = 0.05;
-double legx2 = 0.35;
-double legy1 = 0.0;
-double legy2 = 0.05;
+double legx1 = 0.35;
+double legx2 = 0.65;
+double legy1 = 0.73;
+double legy2 = 0.8;
 
 double margin_l = 0.150;
 double margin_r = 0.145;

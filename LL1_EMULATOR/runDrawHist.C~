@@ -1,0 +1,203 @@
+#include <iostream>
+#include "runDrawHist.h"
+
+void runDrawHist(bool drawonly=false)
+{
+  if(!drawonly){
+    makeLL1MBDHist t;
+    t.Loop();
+  }
+  string filename = Form("OutputHistLL1MBD_RunNumber%d_%d.root",RunNumberLL1, RunNumberMBD);
+  TFile* rf = (TFile*)gROOT->GetListOfFiles()->FindObject((filename.c_str()));
+  
+  if(!rf || !rf->IsOpen()){
+    cout << __FILE__<<__FUNCTION__<<__LINE__<<" Opening new file."<<endl;
+    rf = new TFile(filename.c_str());
+  }   
+
+  string outdir = "plots";
+  outdir += Form("/Run%d",RunNumberMBD);
+  void * dirf = gSystem->OpenDirectory(outdir.c_str());
+
+  if(dirf) gSystem->FreeDirectory(dirf);
+  else {gSystem->mkdir(outdir.c_str(), kTRUE);}
+
+  string saven = Form("Run%d",RunNumberMBD);
+  string infotext = Form("#bf{%s} Run%d",str_date.c_str(),RunNumberMBD);
+
+  TEfficiency* h_eff_emulate = (TEfficiency*) rf->Get("h_eff_emulate");  
+  TEfficiency* h_hitmap_n = (TEfficiency*) rf->Get("h_hitmap_n");  
+  TEfficiency* h_hitmap_s = (TEfficiency*) rf->Get("h_hitmap_s");  
+  TH2D *h_line_up = (TH2D*) rf->Get("h_line_up");
+  TH2D *h_nhit_emu = (TH2D*) rf->Get("h_nhit_emu");
+  TH1D *h_nhit_n1 = (TH1D*) rf->Get("h_nhit_n1");
+  TH1D *h_nhit_n2 = (TH1D*) rf->Get("h_nhit_n2");
+  TH1D *h_nhit_s1 = (TH1D*) rf->Get("h_nhit_n3");
+  TH1D *h_nhit_s2 = (TH1D*) rf->Get("h_nhit_n4");
+  TH2D *h_nhit_emu_bad = (TH2D*) rf->Get("h_nhit_emu_bad");
+  TH1D *h_hitdiff_n = (TH1D*) rf->Get("h_hitdiff_n");
+  TH1D *h_hitdiff_s = (TH1D*) rf->Get("h_hitdiff_s");
+  gStyle->SetOptStat(0);
+  TCanvas *c_eff_emulate = new TCanvas("c_eff_emulate","", 700, 700);
+  TLine *line;
+  gPad->SetTicks(1,1);
+
+  c_eff_emulate->SetLeftMargin(0.151);
+  c_eff_emulate->SetRightMargin(0.153);
+  h_eff_emulate->Draw("colz");
+  gPad->Update();
+  auto geff = h_eff_emulate->GetPaintedHistogram();
+  geff->GetZaxis()->SetRangeUser(-0.1, 1.0);
+
+  gPad->Update();
+  drawText("#bf{#it{sPHENIX}} Internal",sphenix_x+0.07,sphenix_y, 0, 1,sphenix_textsize, 43);
+  drawText("Au+Au #sqrt{s_{NN}}=200 GeV",col_x,col_y, 0, 1,col_textsize, 43);
+  TLegend* leg_corr = new TLegend(legx1,legy1,legx2,legy2);
+  SetLegendStyle(leg_corr);
+  leg_corr->SetHeader(infotext.c_str());
+  leg_corr->Draw("same");
+  line = new TLine(0, 0, 64, 64);
+  SetLineAtt(line, kBlack, 4, 2);
+  line->Draw();
+  c_eff_emulate->SaveAs(Form("%s/hist_eff_emulate_%s.pdf",outdir.c_str(),saven.c_str()));
+
+  TCanvas *c_hitdiff = new TCanvas("c_hitdiff","", 700, 700); 
+  gPad->SetTicks(1,1);
+
+  c_hitdiff->SetLeftMargin(0.151);
+  c_hitdiff->SetRightMargin(0.153);
+
+  SetMarkerAtt(h_hitdiff_n, kYellow - 2, 2, 1);
+  SetMarkerAtt(h_hitdiff_s, kBlue - 2, 2, 1);
+  SetLineAtt(h_hitdiff_n, kYellow - 2, 2, 2);
+  SetLineAtt(h_hitdiff_s, kBlue - 2, 2, 2);
+
+  h_hitdiff_n->Draw("hist");
+  h_hitdiff_s->Draw("hist same");
+  drawText("#bf{#it{sPHENIX}} Internal",sphenix_x+0.07,sphenix_y, 0, 1,sphenix_textsize, 43);
+  drawText("Au+Au #sqrt{s_{NN}}=200 GeV",col_x,col_y, 0, 1,col_textsize, 43);
+  
+  TLegend *leg_hitdiff = new TLegend(legx1,legy1,legx2,legy2);
+  SetLegendStyle(leg_hitdiff);
+  leg_hitdiff->SetHeader(infotext.c_str());
+  leg_hitdiff->Draw("same");
+
+  TLegend *leg_nsd = new TLegend(0.2,0.75,0.45,0.85);
+  SetLegendStyle(leg_nsd);
+  leg_nsd->AddEntry(h_hitdiff_n,"North Hit Diff");
+  leg_nsd->AddEntry(h_hitdiff_s,"South Hit Diff");
+  leg_nsd->Draw("same");
+
+  c_hitdiff->SaveAs(Form("%s/hist_hitdiff_%s.pdf",outdir.c_str(),saven.c_str()));
+
+  
+  TCanvas *c_eff_hit = new TCanvas("c_eff_hit","", 700, 700);
+  gPad->SetTicks(1,1);
+
+  c_eff_hit->SetLeftMargin(0.151);
+  c_eff_hit->SetRightMargin(0.153);
+
+  SetMarkerAtt(h_hitmap_n, kYellow - 2, 2, 1);
+  SetMarkerAtt(h_hitmap_s, kBlue - 2, 2, 1);
+  SetLineAtt(h_hitmap_n, kYellow - 2, 2, 2);
+  SetLineAtt(h_hitmap_s, kBlue - 2, 2, 2);
+
+  h_hitmap_n->Draw("");
+  gPad->Update();
+  auto g = h_hitmap_n->GetPaintedGraph();
+  g->SetMinimum(0.);
+  g->SetMaximum(0.7);
+  gPad->Update();
+  h_hitmap_s->Draw("same");
+  line = new TLine(15.5, 0, 15.5, 0.7);
+  SetLineAtt(line, kBlack, 2, 1);
+  line->Draw("same");
+  line = new TLine(47.5, 0, 47.5, 0.7);
+  SetLineAtt(line, kBlack, 2, 1);
+  line->Draw("same");
+  drawText("#bf{#it{sPHENIX}} Internal",sphenix_x+0.07,sphenix_y, 0, 1,sphenix_textsize, 43);
+  drawText("Au+Au #sqrt{s_{NN}}=200 GeV",col_x,col_y, 0, 1,col_textsize, 43);
+  
+  TLegend *leg_hit = new TLegend(legx1,legy1,legx2,legy2);
+  SetLegendStyle(leg_hit);
+  leg_hit->SetHeader(infotext.c_str());
+  leg_hit->Draw("same");
+
+  TLegend *leg_ns = new TLegend(0.35,0.75,0.65,0.85);
+  SetLegendStyle(leg_ns);
+  leg_ns->AddEntry(h_hitmap_n,"North Hitmap");
+  leg_ns->AddEntry(h_hitmap_s,"South Hitmap");
+  leg_ns->Draw("same");
+
+  c_eff_hit->SaveAs(Form("%s/hist_hitmap_%s.pdf",outdir.c_str(),saven.c_str()));
+
+
+  TCanvas *c_line_up = new TCanvas("c_line_up","", 700, 700);
+  gPad->SetTicks(1,1);
+
+  c_line_up->SetLeftMargin(0.151);
+  c_line_up->SetRightMargin(0.153);
+  //  c_line_up->SetLogz();
+  h_line_up->Draw("colz");
+    
+  drawText("#bf{#it{sPHENIX}} Internal",sphenix_x+0.07,sphenix_y, 0, 1,sphenix_textsize, 43);
+  drawText("Au+Au #sqrt{s_{NN}}=200 GeV",col_x,col_y, 0, 1,col_textsize, 43);
+  
+  TLegend *leg_line = new TLegend(legx1,legy1,legx2,legy2);
+  SetLegendStyle(leg_line);
+  leg_line->SetHeader(infotext.c_str());
+  leg_line->Draw("same");
+
+  c_line_up->SaveAs(Form("%s/hist_line_up_%s.pdf",outdir.c_str(),saven.c_str()));
+
+  TCanvas *c_nhit_emu = new TCanvas("c_nhit_emu","", 700, 700);
+  gPad->SetTicks(1,1);
+
+  c_nhit_emu->SetLeftMargin(0.151);
+  c_nhit_emu->SetRightMargin(0.153);
+  c_nhit_emu->SetLogz();
+  h_nhit_emu->Draw("colz");
+    
+  drawText("#bf{#it{sPHENIX}} Internal",sphenix_x+0.07,sphenix_y, 0, 1,sphenix_textsize, 43);
+  drawText("Au+Au #sqrt{s_{NN}}=200 GeV",col_x,col_y, 0, 1,col_textsize, 43);
+
+  TCanvas *c_nhit_emu_bad = new TCanvas("c_nhit_emu_bad","", 700, 700);
+  gPad->SetTicks(1,1);
+
+  c_nhit_emu_bad->SetLeftMargin(0.151);
+  c_nhit_emu_bad->SetRightMargin(0.153);
+  c_nhit_emu_bad->SetLogz();
+  h_nhit_emu_bad->Draw("colz");
+    
+  drawText("#bf{#it{sPHENIX}} Internal",sphenix_x+0.07,sphenix_y, 0, 1,sphenix_textsize, 43);
+  drawText("Au+Au #sqrt{s_{NN}}=200 GeV",col_x,col_y, 0, 1,col_textsize, 43);
+  
+  TLegend *leg_emu_bad = new TLegend(legx1,legy1,legx2,legy2);
+  SetLegendStyle(leg_emu_bad);
+  leg_emu_bad->SetHeader(infotext.c_str());
+  leg_emu_bad->Draw("same");
+
+  c_nhit_emu_bad->SaveAs(Form("%s/hist_nhit_emu_bad_%s.pdf",outdir.c_str(),saven.c_str()));
+
+  TCanvas *c_nhit_4 = new TCanvas("c_nhit_4","", 700, 700);
+  drawText("#bf{#it{sPHENIX}} Internal",sphenix_x+0.07,sphenix_y,0,1,sphenix_textsize, 43);
+  drawText("Au+Au #sqrt{s_{NN}}=200 GeV",col_x,col_y,0,1,col_textsize, 43);
+
+  c_nhit_4->Divide(2,2);
+  gPad->SetTicks(1,1);
+  c_nhit_4->cd(1);
+  h_nhit_n1->Draw("hist");
+  drawText("North 1",col_x,col_y,0,1,col_textsize, 43);
+  c_nhit_4->cd(2);
+  h_nhit_n2->Draw("hist");
+  drawText("North 2",col_x,col_y,0,1,col_textsize, 43);
+  c_nhit_4->cd(3);
+  h_nhit_s1->Draw("hist");
+  drawText("South 1",col_x,col_y,0,1,col_textsize, 43);
+  c_nhit_4->cd(4);
+  h_nhit_s2->Draw("hist");
+  drawText("South 2",col_x,col_y,0,1,col_textsize, 43);
+  c_nhit_4->cd();
+  c_nhit_4->SaveAs(Form("%s/hist_nhit_4_%s.pdf",outdir.c_str(),saven.c_str()));
+
+}

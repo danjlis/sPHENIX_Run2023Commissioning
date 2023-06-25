@@ -120,7 +120,7 @@ protected :
 
    int runN = RunNumber;
    //string filename = Form("/sphenix/user/dlis/Projects/fit_emcal/root_mbd/calib-0000%d-0000.root",RunNumber);
-   string filename = Form("/gpfs/mnt/gpfs02/sphenix/user/jpark4/EMCAL_PRDF/analysis/run/sPHENIX_Run2023Commissioning/MBD_ANA/rootfiles/calib-0000%d-0000.root",RunNumber);
+   string filename = Form("/gpfs/mnt/gpfs02/sphenix/user/dlis/Projects/sPHENIX_Run2023Commissioning/MBD_ANA/rootfiles/beam_mbd-000%d-0000.root",RunNumber);
 };
 
 #endif

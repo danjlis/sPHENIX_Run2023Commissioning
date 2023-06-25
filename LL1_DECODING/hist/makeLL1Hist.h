@@ -5,7 +5,7 @@
 #include <TChain.h>
 #include <TFile.h>
 #include "runinfo.h"
-#include "../../Utility/Style_jaebeom.h"
+#include "../../Utility/Style_dlis.h"
 
 class makeLL1Hist {
 public :
@@ -81,15 +81,23 @@ public :
 protected:
    TH1D* h_nhit_n;
    TH1D* h_nhit_s;
+   TH1D* h_nhit_n1;
+   TH1D* h_nhit_n2;
+   TH1D* h_nhit_s1;
+   TH1D* h_nhit_s2;
+   TH2D* h_nhit_n_corr;
+   TH2D* h_nhit_s_corr;
+   TH1D* h_time_diff;
    TH2D* h_nhit_corr;
    TH2D* h_hit_check;
+   TH2D* h_line_up;
    const int nSamples = 20;
    const int nChannels =52;
    const int nChargeChannels = 8;
-   const int nHitSampleIdx = 8;
+   const int nHitSampleIdx = 9;
 
    const int nhitbins = 65;
-
+   
 };
 
 #endif
@@ -98,9 +106,9 @@ protected:
 makeLL1Hist::makeLL1Hist(TTree *tree) : fChain(0) 
 {
    if (tree == 0) {
-      TFile *f = (TFile*)gROOT->GetListOfFiles()->FindObject(Form("/gpfs/mnt/gpfs02/sphenix/user/jpark4/Run2023Commissioning/analysis/run/sPHENIX_Run2023Commissioning/LL1_DECODING/LL1_to_root/rootfiles/junk_LL1-00000%d-0000.root",RunNumber));
+      TFile *f = (TFile*)gROOT->GetListOfFiles()->FindObject(Form("/gpfs/mnt/gpfs02/sphenix/user/dlis/Projects/sPHENIX_Run2023Commissioning/LL1_DECODING/LL1_to_root/rootfiles/beam_LL1-000%d-0000.root",RunNumber));
       if (!f || !f->IsOpen()) {
-         f = new TFile(Form("/gpfs/mnt/gpfs02/sphenix/user/jpark4/Run2023Commissioning/analysis/run/sPHENIX_Run2023Commissioning/LL1_DECODING/LL1_to_root/rootfiles/junk_LL1-00000%d-0000.root",RunNumber));
+         f = new TFile(Form("/gpfs/mnt/gpfs02/sphenix/user/dlis/Projects/sPHENIX_Run2023Commissioning/LL1_DECODING/LL1_to_root/rootfiles/beam_LL1-000%d-0000.root",RunNumber));
       }
       f->GetObject("W",tree);
 
@@ -133,7 +141,9 @@ Long64_t makeLL1Hist::LoadTree(Long64_t entry)
 
 void makeLL1Hist::Init(TTree *tree)
 {
+
    if (!tree) return;
+
    fChain = tree;
    fCurrent = -1;
    fChain->SetMakeClass(1);

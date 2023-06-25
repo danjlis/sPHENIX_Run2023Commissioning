@@ -1,0 +1,334 @@
+#ifndef makeLL1MBDHist_h
+#define makeLL1MBDHist_h
+
+#include <TROOT.h>
+#include <TChain.h>
+#include <TFile.h>
+#include "runinfo.h"
+#include "../Utility/Style_dlis.h"
+#include "mbdEmulator.h"
+
+class makeLL1MBDHist {
+public :
+  // LL1 //
+   TTree          *fChain_ll1;   
+   Int_t           fCurrent_ll1; 
+
+   // Declaration of leaf types
+   Int_t           ll1runnumber;
+   Int_t           ll1evtnr;
+   Int_t           ll1clock;
+   Int_t           channel[52][20];
+   Int_t           triggerwords[8][20];
+   Int_t           nhit_n1[20];
+   Int_t           nhit_n2[20];
+   Int_t           nhit_s1[20];
+   Int_t           nhit_s2[20];
+   Int_t           nhit_n[20];
+   Int_t           nhit_s[20];
+   Int_t           chargesum_n1[20];
+   Int_t           chargesum_n2[20];
+   Int_t           chargesum_s1[20];
+   Int_t           chargesum_s2[20];
+   Int_t           chargesum_n[20];
+   Int_t           chargesum_s[20];
+   Int_t           timesum_n1[20];
+   Int_t           timesum_n2[20];
+   Int_t           timesum_s1[20];
+   Int_t           timesum_s2[20];
+   Int_t           timesum_n[20];
+   Int_t           timesum_s[20];
+   Int_t           idxsample;
+   Int_t           idxhitn;
+   Int_t           idxhits;
+
+   // List of branches
+   TBranch        *b_ll1runnumber;   //!
+   TBranch        *b_ll1evtnr;   //!
+   TBranch        *b_ll1clock;   //!
+   TBranch        *b_channel;   //!
+   TBranch        *b_triggerwords;   //!
+   TBranch        *b_nhit_n1;   //!
+   TBranch        *b_nhit_n2;   //!
+   TBranch        *b_nhit_s1;   //!
+   TBranch        *b_nhit_s2;   //!
+   TBranch        *b_nhit_n;   //!
+   TBranch        *b_nhit_s;   //!
+   TBranch        *b_chargesum_n1;   //!
+   TBranch        *b_chargesum_n2;   //!
+   TBranch        *b_chargesum_s1;   //!
+   TBranch        *b_chargesum_s2;   //!
+   TBranch        *b_chargesum_n;   //!
+   TBranch        *b_chargesum_s;   //!
+   TBranch        *b_timesum_n1;   //!
+   TBranch        *b_timesum_n2;   //!
+   TBranch        *b_timesum_s1;   //!
+   TBranch        *b_timesum_s2;   //!
+   TBranch        *b_timesum_n;   //!
+   TBranch        *b_timesum_s;   //!
+   TBranch        *b_idxsample;   //!
+   TBranch        *b_idxhitn;   //!
+   TBranch        *b_idxhits;   //!
+
+   // LL1 //
+   // MBD //
+   TTree          *fChain_mbd;   //!pointer to the analyzed TTree or TChain
+   Int_t           fCurrent_mbd; //!current Tree number in a TChain
+
+// Fixed size dimensions of array or collections stored in the TTree if any.
+
+   // Declaration of leaf types
+   Int_t           mbdrunnumber;
+   Int_t           mbdevtnr;
+   Int_t           mbdclock;
+   Int_t           femslot[4];
+   Int_t           femevtnr[4];
+   Int_t           femclock[4];
+   Int_t           adc[256][31];
+   Float_t         mean[256];
+   Float_t         rms[256];
+   Int_t           minadc[256];
+   Int_t           maxadc[256];
+   Float_t         pedestal[256];
+   Float_t         pedsig[256];
+   Float_t         peak[256];
+   Float_t         time[256];
+   Float_t         integral[256];
+   Float_t         integral2[256];
+   Int_t           summary[2];
+
+   // List of branches
+   TBranch        *b_mbdrunnumber;   //!
+   TBranch        *b_mbdevtnr;   //!
+   TBranch        *b_mbdclock;   //!
+   TBranch        *b_femslot;   //!
+   TBranch        *b_femevtnr;   //!
+   TBranch        *b_femclock;   //!
+   TBranch        *b_adc;   //!
+   TBranch        *b_mean;   //!
+   TBranch        *b_rms;   //!
+   TBranch        *b_minadc;   //!
+   TBranch        *b_maxadc;   //!
+   TBranch        *b_pedestal;   //!
+   TBranch        *b_pedsig;   //!
+   TBranch        *b_peak;   //!
+   TBranch        *b_time;   //!
+   TBranch        *b_integral;   //!
+   TBranch        *b_integral2;   //!
+   TBranch        *b_summary;   //!
+   
+   // MBD //
+
+  makeLL1MBDHist(TTree *tree1=0, TTree *tree2 = 0);
+  virtual ~makeLL1MBDHist();
+  virtual Int_t    Cut(Long64_t entry);
+  virtual Int_t    GetEntry(Long64_t entry);
+  virtual Long64_t LoadTree(Long64_t entry);
+  virtual void     Init(TTree *tree1, TTree *tree2);
+  virtual void     Loop();
+  virtual void     One(int event = 10);
+  virtual Bool_t   Notify();
+  virtual void     Show(Long64_t entry = -1);
+
+protected:
+
+  //   virtual std::pair<int,int> MBD_ChannelMap(int ich);
+   const int nChannelsMBD = 64;
+   const int nSamplesMBD = 31;
+
+   int evt_start, evt_end;
+
+   TEfficiency *h_hitmap_s;
+   TEfficiency *h_hitmap_n;
+   TH2D *h_line_up;
+   TH2D *h_nhit_emu;
+   TH1D *h_nhit_n1;
+   TH1D *h_nhit_n2;
+   TH1D *h_nhit_s1;
+   TH1D *h_nhit_s2;
+   TH2D *h_nhit_emu_bad;
+   TEfficiency* pEff_emulate;
+   TH1D *h_hitdiff_n;
+   TH1D *h_hitdiff_s;
+   int NADC_OFF =8;
+   int NOFFSET =16;
+   int ch_ns_div = 64;
+
+   int runnumberMBD = RunNumberMBD;
+   int runnumberLL1 = RunNumberLL1;
+
+   string filenameMBD = Form("/gpfs/mnt/gpfs02/sphenix/user/dlis/Projects/rawdata/mbd/junk-0000000%d-0000.root",RunNumberMBD);
+   string filenameLL1 = Form("/gpfs/mnt/gpfs02/sphenix/user/dlis/Projects/rawdata/ll1/junk-0000000%d-0000.root",RunNumberLL1);
+
+   const int nSamplesLL1 = 20;
+   const int nChannelsLL1 =52;
+   const int nChargeChannels = 9;
+   const int nHitSampleIdx = 9;
+  
+};
+
+#endif
+
+#ifdef makeLL1MBDHist_cxx
+makeLL1MBDHist::makeLL1MBDHist(TTree *tree1, TTree *tree2) 
+{
+
+  if (tree1 == 0) {
+    TFile *f = (TFile*)gROOT->GetListOfFiles()->FindObject(Form("/gpfs/mnt/gpfs02/sphenix/user/dlis/Projects/sPHENIX_Run2023Commissioning/LL1_DECODING/LL1_to_root/rootfiles/beam_LL1-000%d-0000.root",RunNumberLL1));
+    if (!f || !f->IsOpen()) {
+      f = new TFile(Form("/gpfs/mnt/gpfs02/sphenix/user/dlis/Projects/sPHENIX_Run2023Commissioning/LL1_DECODING/LL1_to_root/rootfiles/beam_LL1-000%d-0000.root",RunNumberLL1));
+    }
+    f->GetObject("W",tree1);
+    
+  }
+
+  // mbd
+  if (tree2 == 0) {
+    TFile *f = (TFile*)gROOT->GetListOfFiles()->FindObject(Form("/gpfs/mnt/gpfs02/sphenix/user/dlis/Projects/sPHENIX_Run2023Commissioning/MBD_ANA/rootfiles/beam_mbd-000%d-0000.root",RunNumberMBD));
+    if (!f || !f->IsOpen()) {
+      f = new TFile(Form("/gpfs/mnt/gpfs02/sphenix/user/dlis/Projects/sPHENIX_Run2023Commissioning/MBD_ANA/rootfiles/beam_mbd-000%d-0000.root",RunNumberMBD));
+    }
+    f->GetObject("W",tree2);
+    
+  }
+
+  Init(tree1, tree2);
+}
+
+makeLL1MBDHist::~makeLL1MBDHist()
+{
+   if (!fChain_ll1) return;
+   delete fChain_ll1->GetCurrentFile();
+
+   if (!fChain_mbd) return;
+   delete fChain_mbd->GetCurrentFile();
+
+   return;
+
+}
+
+Int_t makeLL1MBDHist::GetEntry(Long64_t entry)
+{
+   if (!fChain_ll1) return 0;
+   fChain_ll1->GetEntry(entry);
+   if (!fChain_mbd) return 0;
+   return fChain_mbd->GetEntry(entry);
+
+}
+Long64_t makeLL1MBDHist::LoadTree(Long64_t entry)
+{
+   if (!fChain_ll1) return -5;
+   Long64_t centry = fChain_ll1->LoadTree(entry);
+   if (centry < 0) return centry;
+   if (fChain_ll1->GetTreeNumber() != fCurrent_ll1) {
+      fCurrent_ll1 = fChain_ll1->GetTreeNumber();
+      Notify();
+   }
+
+   if (!fChain_mbd) return -5;
+   centry = fChain_mbd->LoadTree(entry);
+   if (centry < 0) return centry;
+   if (fChain_mbd->GetTreeNumber() != fCurrent_mbd) {
+      fCurrent_mbd = fChain_mbd->GetTreeNumber();
+      Notify();
+   }
+
+   return centry;
+
+}
+
+void makeLL1MBDHist::Init(TTree *tree1, TTree *tree2)
+{
+
+  if (!tree1)
+    {
+      cout << "LL1 tree not found..."<<endl;
+    }
+
+  if (!tree2)
+    {
+      cout << "MBD tree not found..."<<endl;
+    }
+
+   fChain_ll1 = tree1;
+   fCurrent_ll1 = -1;
+   fChain_ll1->SetMakeClass(1);
+
+   fChain_ll1->SetBranchAddress("runnumber", &ll1runnumber, &b_ll1runnumber);
+   fChain_ll1->SetBranchAddress("evtnr", &ll1evtnr, &b_ll1evtnr);
+   fChain_ll1->SetBranchAddress("clock", &ll1clock, &b_ll1clock);
+   fChain_ll1->SetBranchAddress("channel", channel, &b_channel);
+   fChain_ll1->SetBranchAddress("triggerwords", triggerwords, &b_triggerwords);
+   fChain_ll1->SetBranchAddress("nhit_n1", nhit_n1, &b_nhit_n1);
+   fChain_ll1->SetBranchAddress("nhit_n2", nhit_n2, &b_nhit_n2);
+   fChain_ll1->SetBranchAddress("nhit_s1", nhit_s1, &b_nhit_s1);
+   fChain_ll1->SetBranchAddress("nhit_s2", nhit_s2, &b_nhit_s2);
+   fChain_ll1->SetBranchAddress("nhit_n", nhit_n, &b_nhit_n);
+   fChain_ll1->SetBranchAddress("nhit_s", nhit_s, &b_nhit_s);
+   fChain_ll1->SetBranchAddress("chargesum_n1", chargesum_n1, &b_chargesum_n1);
+   fChain_ll1->SetBranchAddress("chargesum_n2", chargesum_n2, &b_chargesum_n2);
+   fChain_ll1->SetBranchAddress("chargesum_s1", chargesum_s1, &b_chargesum_s1);
+   fChain_ll1->SetBranchAddress("chargesum_s2", chargesum_s2, &b_chargesum_s2);
+   fChain_ll1->SetBranchAddress("chargesum_n", chargesum_n, &b_chargesum_n);
+   fChain_ll1->SetBranchAddress("chargesum_s", chargesum_s, &b_chargesum_s);
+   fChain_ll1->SetBranchAddress("timesum_n1", timesum_n1, &b_timesum_n1);
+   fChain_ll1->SetBranchAddress("timesum_n2", timesum_n2, &b_timesum_n2);
+   fChain_ll1->SetBranchAddress("timesum_s1", timesum_s1, &b_timesum_s1);
+   fChain_ll1->SetBranchAddress("timesum_s2", timesum_s2, &b_timesum_s2);
+   fChain_ll1->SetBranchAddress("timesum_n", timesum_n, &b_timesum_n);
+   fChain_ll1->SetBranchAddress("timesum_s", timesum_s, &b_timesum_s);
+   fChain_ll1->SetBranchAddress("idxsample", &idxsample, &b_idxsample);
+   fChain_ll1->SetBranchAddress("idxhitn", &idxhitn, &b_idxhitn);
+   fChain_ll1->SetBranchAddress("idxhits", &idxhits, &b_idxhits);
+
+   fChain_mbd = tree2;
+   fCurrent_mbd = -1;
+   fChain_mbd->SetMakeClass(1);
+
+   fChain_mbd->SetBranchAddress("mbdrunnumber", &mbdrunnumber, &b_mbdrunnumber);
+   fChain_mbd->SetBranchAddress("mbdevtnr", &mbdevtnr, &b_mbdevtnr);
+   fChain_mbd->SetBranchAddress("mbdclock", &mbdclock, &b_mbdclock);
+   fChain_mbd->SetBranchAddress("femslot", femslot, &b_femslot);
+   fChain_mbd->SetBranchAddress("femevtnr", femevtnr, &b_femevtnr);
+   fChain_mbd->SetBranchAddress("femclock", femclock, &b_femclock);
+   fChain_mbd->SetBranchAddress("adc", adc, &b_adc);
+   fChain_mbd->SetBranchAddress("mean", mean, &b_mean);
+   fChain_mbd->SetBranchAddress("rms", rms, &b_rms);
+   fChain_mbd->SetBranchAddress("minadc", minadc, &b_minadc);
+   fChain_mbd->SetBranchAddress("maxadc", maxadc, &b_maxadc);
+   fChain_mbd->SetBranchAddress("pedestal", pedestal, &b_pedestal);
+   fChain_mbd->SetBranchAddress("pedsig", pedsig, &b_pedsig);
+   fChain_mbd->SetBranchAddress("peak", peak, &b_peak);
+   fChain_mbd->SetBranchAddress("time", time, &b_time);
+   fChain_mbd->SetBranchAddress("integral", integral, &b_integral);
+   fChain_mbd->SetBranchAddress("integral2", integral2, &b_integral2);
+   fChain_mbd->SetBranchAddress("summary", summary, &b_summary);
+   Notify();
+
+   Notify();
+}
+
+Bool_t makeLL1MBDHist::Notify()
+{
+   return kTRUE;
+}
+
+void makeLL1MBDHist::Show(Long64_t entry)
+{
+  if (!fChain_ll1)
+    {
+      cout <<"No ll1 chain..."<<endl;
+    }
+  if (!fChain_mbd)
+    {
+      cout <<"No mbd chain..."<<endl;
+    }
+
+  fChain_ll1->Show(entry);
+  fChain_mbd->Show(entry);
+}
+Int_t makeLL1MBDHist::Cut(Long64_t entry)
+{
+   return 1;
+}
+#endif // #ifdef makeLL1MBDHist_cxx
