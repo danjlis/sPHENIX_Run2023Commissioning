@@ -22,6 +22,7 @@ void makeLL1MBDHist::Loop(bool onlyMBD = false)
   int hitmap[128];
   unsigned int trig[60][25];
   int thresh = 2;
+
   h_hitmap_n = new TEfficiency("h_hitmap_n",";PMT_{North};<HIT>", 64, -0.5, 63.5);
   h_hitmap_s = new TEfficiency("h_hitmap_s",";PMT_{South};<HIT>", 64, -0.5, 63.5);
   pEff_emulate = new TEfficiency("h_eff_emulate",";N_{HIT}^{NORTH};N_{HIT}^{SOUTH};#epsilon",65,-0.5,64.5,65,-0.5,64.5);
@@ -43,15 +44,15 @@ void makeLL1MBDHist::Loop(bool onlyMBD = false)
   Long64_t jentry_mbd = 0;
   Long64_t jentry_ll1 = 0;
   Long64_t jentry = 0;
-  int idxem = 11;
+  int idxem = 12;
   int idxemax = 0;
   unsigned int emax = 0;
   int bad = 0;
   int nen = 0;
 
   int nSkip = 0;
-
-  while (jentry<nentries) {
+  bool leave = false;
+  while (jentry<10000 && !leave){//nentries) {
 
     //    Long64_t ientry = LoadTree(jentry);
 
@@ -61,14 +62,31 @@ void makeLL1MBDHist::Loop(bool onlyMBD = false)
 
     if (!onlyMBD) nbll1 = fChain_ll1->GetEntry(jentry_ll1);   nbytesll1 += nbll1;
     //if (Cut(ientry) < 0) continue;
+    if (!onlyMBD && femclock[0] != ll1clock - 8) {
+      std::cout << "CLOCKS! :"<<femclock[0] << " " << ll1clock << std::endl;
+    }
 
+    
     while ( !onlyMBD && femevtnr[0] != ll1evtnr)
       {
 
-	if (nSkip>1) break;
+	if (nSkip>5) 
+	  {
+	    leave = true;
+	    break;
+	  }
 	nSkip++;
-	cout <<"Out of sync at "<<jentry<<endl;
-	jentry_mbd++;
+	cout <<"Out of sync at "<<jentry<<": "<<femevtnr[0] << " - "<< ll1evtnr <<endl;
+	if (femevtnr[0] < ll1evtnr)
+	  {
+	    jentry_mbd++;
+	    nbmbd = fChain_mbd->GetEntry(jentry_mbd);   nbytesmbd += nbmbd;
+	  }
+	else
+	  { 
+	    jentry_ll1++;
+	    nbll1 = fChain_ll1->GetEntry(jentry_ll1);   nbytesll1 += nbll1;
+	  }
 	continue;
       }
     nSkip=0;
@@ -183,6 +201,8 @@ void makeLL1MBDHist::One(int event = 10, bool onlyMBD = false)
     nbmbd = fChain_mbd->GetEntry(jentry);   nbytesmbd += nbmbd;
     if (!onlyMBD) nbll1 = fChain_ll1->GetEntry(jentry);   nbytesll1 += nbll1;
     if (Cut(ientry) < 0) continue;
+
+
     while (!onlyMBD && femevtnr[0] != ll1evtnr)
       {
 	jentry++;

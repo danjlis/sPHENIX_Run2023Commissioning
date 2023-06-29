@@ -5,7 +5,7 @@ void runDrawHist(bool drawonly=false)
 {
   if(!drawonly){
     makeLL1MBDHist t;
-    t.Loop(true);
+    t.Loop();
   }
   std::cout << __LINE__<<std::endl;
   string filename = Form("OutputHistLL1MBD_RunNumber%d_%d.root",RunNumberLL1, RunNumberMBD);

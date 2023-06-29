@@ -297,8 +297,8 @@ void makeLL1MBDHist::Init(TTree *tree1, TTree *tree2)
   fChain_mbd->SetMakeClass(1);
 
   fChain_mbd->SetBranchAddress("mbdrunnumber", &mbdrunnumber, &b_mbdrunnumber);
-  fChain_mbd->SetBranchAddress("mbdevtnr", &mbdevtnr, &b_mbdevtnr);
-  fChain_mbd->SetBranchAddress("mbdclock", &mbdclock, &b_mbdclock);
+  fChain_mbd->SetBranchAddress("evtnr", &mbdevtnr, &b_mbdevtnr);
+  fChain_mbd->SetBranchAddress("clock", &mbdclock, &b_mbdclock);
   fChain_mbd->SetBranchAddress("femslot", femslot, &b_femslot);
   fChain_mbd->SetBranchAddress("femevtnr", femevtnr, &b_femevtnr);
   fChain_mbd->SetBranchAddress("femclock", femclock, &b_femclock);
