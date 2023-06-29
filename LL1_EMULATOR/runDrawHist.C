@@ -5,8 +5,9 @@ void runDrawHist(bool drawonly=false)
 {
   if(!drawonly){
     makeLL1MBDHist t;
-    t.Loop();
+    t.Loop(true);
   }
+  std::cout << __LINE__<<std::endl;
   string filename = Form("OutputHistLL1MBD_RunNumber%d_%d.root",RunNumberLL1, RunNumberMBD);
   TFile* rf = (TFile*)gROOT->GetListOfFiles()->FindObject((filename.c_str()));
   
@@ -34,6 +35,10 @@ void runDrawHist(bool drawonly=false)
   TH1D *h_nhit_n2 = (TH1D*) rf->Get("h_nhit_n2");
   TH1D *h_nhit_s1 = (TH1D*) rf->Get("h_nhit_s1");
   TH1D *h_nhit_s2 = (TH1D*) rf->Get("h_nhit_s2");
+
+  TH1D *h_mbd_vtx = (TH1D*) rf->Get("h_mbd_vtx");
+  TH1D *h_mbd_vtx_cut = (TH1D*) rf->Get("h_mbd_vtx_cut");
+
   TH2D *h_nhit_emu_bad = (TH2D*) rf->Get("h_nhit_emu_bad");
   TH1D *h_hitdiff_n = (TH1D*) rf->Get("h_hitdiff_n");
   TH1D *h_hitdiff_s = (TH1D*) rf->Get("h_hitdiff_s");
@@ -90,6 +95,39 @@ void runDrawHist(bool drawonly=false)
 
   c_hitdiff->SaveAs(Form("%s/hist_hitdiff_%s.pdf",outdir.c_str(),saven.c_str()));
 
+
+  //------------------
+  TCanvas *c_mbd_vtx = new TCanvas("c_mbd_vtx","", 700, 700); 
+  gPad->SetTicks(1,1);
+
+  c_mbd_vtx->SetLeftMargin(0.151);
+  c_mbd_vtx->SetRightMargin(0.153);
+
+  SetMarkerAtt(h_mbd_vtx, kYellow - 2, 2, 1);
+  SetMarkerAtt(h_mbd_vtx_cut, kBlue - 2, 2, 1);
+  SetLineAtt(h_mbd_vtx, kYellow - 2, 2, 2);
+  SetLineAtt(h_mbd_vtx_cut, kBlue - 2, 2, 2);
+
+  h_mbd_vtx->Draw("hist");
+  h_mbd_vtx_cut->Draw("hist same");
+  drawText("#bf{#it{sPHENIX}} Internal",sphenix_x+0.07,sphenix_y, 0, 1,sphenix_textsize, 43);
+  drawText("Au+Au #sqrt{s_{NN}}=200 GeV",col_x,col_y, 0, 1,col_textsize, 43);
+  
+  TLegend *leg_mbd_vtx = new TLegend(legx1,legy1,legx2,legy2);
+  SetLegendStyle(leg_mbd_vtx);
+  leg_mbd_vtx->SetHeader(infotext.c_str());
+  leg_mbd_vtx->Draw("same");
+
+  TLegend *leg_vtx = new TLegend(0.2,0.75,0.45,0.85);
+  SetLegendStyle(leg_vtx);
+  leg_vtx->AddEntry(h_mbd_vtx,"VTX dist");
+  leg_vtx->AddEntry(h_mbd_vtx_cut,"vtx dist w/ trigger");
+  leg_vtx->Draw("same");
+
+  c_mbd_vtx->SaveAs(Form("%s/hist_mbd_vtx_%s.pdf",outdir.c_str(),saven.c_str()));
+
+  //--------------------
+
   
   TCanvas *c_eff_hit = new TCanvas("c_eff_hit","", 700, 700);
   gPad->SetTicks(1,1);
@@ -106,7 +144,7 @@ void runDrawHist(bool drawonly=false)
   gPad->Update();
   auto g = h_hitmap_n->GetPaintedGraph();
   g->SetMinimum(0.);
-  g->SetMaximum(0.7);
+  g->SetMaximum(1.2);
   gPad->Update();
   h_hitmap_s->Draw("same");
   line = new TLine(15.5, 0, 15.5, 0.7);

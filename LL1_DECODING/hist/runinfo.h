@@ -3,7 +3,7 @@
 
 #include <iostream>
 
-int RunNumber = 14232;
-string str_date = "06/24/2023";
+int RunNumber = 20175;
+string str_date = "06/28/2023";
 
 #endif

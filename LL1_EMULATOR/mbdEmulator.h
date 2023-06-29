@@ -26,9 +26,14 @@ int hit1, hit2, time1, time2, time3;
 
 
 unsigned int m_l1_adc_table[1024];
+unsigned int m_l1_adc_table_time[1024];
 unsigned int m_l1_slewing_table[4096];
 
-
+float f_pmtt0[128];
+float f_bbcn[2];
+float f_bbcte[2];
+float f_bbcz;
+std::vector<float> hit_times[2];  // times of the hits in each [arm]
 
 void EmulateTrigger(int adc[][31], unsigned int trig[][25], int *hitmap)
 {
@@ -37,6 +42,32 @@ void EmulateTrigger(int adc[][31], unsigned int trig[][25], int *hitmap)
   for (i = 0; i < 1024; i++)
     {
       m_l1_adc_table[i] = (i) & 0x3ff;
+    }
+
+  for (i = 0; i < 1024; i++)
+    {
+      //      m_l1_adc_table_time[i] = (0x3ff);
+      //triangle
+      /* if (i < 512) */
+      /* 	{ */
+      /* 	  m_l1_adc_table_time[i] = (2*i & 0x3ff); */
+      /* 	} */
+      /* else */
+      /* 	{	 */
+      /* 	  m_l1_adc_table_time[i] = (0x3ff) - (2*i & 0x3ff); */
+      /* 	} */
+
+      /* if (i < 512) */
+      /* 	{ */
+      /* 	  m_l1_adc_table_time[i] = (0x1ff) + ((i/2) & 0x3ff); */
+      /* 	} */
+      /* else */
+      /* 	{	 */
+      /* 	  m_l1_adc_table_time[i] = (0x3ff) - ((i/2) & 0x3ff); */
+      /* 	} */
+      //      m_l1_adc_table_time[i]  = 0;
+      m_l1_adc_table_time[i]  = (0x100) + ((3*i/4) & 0x3ff);
+
     }
 
   for (i = 0; i < 4096; i++)
@@ -84,8 +115,9 @@ void EmulateTrigger(int adc[][31], unsigned int trig[][25], int *hitmap)
 	  for (int ns = 0; ns < 32 ; ns++)
 	    {
 	      tmp2 = iadc*64 + (ns/8)*16 + (ns%8);
-	      tmp = m_l1_adc_table[ipmp[tmp2]>>4];
-	      if (ig == 5) hitmap[iadc*32 + ns] += (tmp & 0x200) >> 9;
+	      tmp = m_l1_adc_table_time[ipmp[tmp2]>>4];
+	      
+	      if (ig == 11) hitmap[iadc*32 + ns] += (tmp & 0x200) >> 9;
 	      m_trig_nhit[3 - iadc] += (tmp & 0x200) >> 9;	      
 	      tmp3 = m_l1_slewing_table[(qadd[ns] << 9) + (tmp & 0x01ff)];
 	      m_trig_time[3 - iadc][ns/8] += tmp3;
@@ -153,4 +185,81 @@ void EmulateTrigger(int adc[][31], unsigned int trig[][25], int *hitmap)
 
 }
 
+float_t GetVertexZ( float peak[])
+{
+
+
+    hit_times[0].clear();
+    hit_times[1].clear();
+    
+    f_bbcn[0] = 0;
+    f_bbcn[1] = 0;
+    //for (int ich=0; ich<NCH; ich++)
+    for (int ich=0; ich<256; ich++)
+      {
+	int arm = ich/128;    // south or north
+	int board = ich/16;    // south or north
+	//int quad = ich/64;    // quadrant
+	int pmtch = (ich/16)*8 + ich%8;
+	int tq = (ich/8)%2;   // 0 = T-channel, 1 = Q-channel
+
+	Double_t tdc = peak[pmtch];
+	//if ( ich==0 ) cout << "XXX " << tdc << endl;
+	
+	if ( tdc<100 )
+	  {
+	    f_pmtt0[pmtch] = -9999.;   // No Hit
+	  }
+	else
+	  {
+	    f_pmtt0[pmtch] = 12.5 - tdc*0.00189;  // simple linear correction
+	    hit_times[arm].push_back( f_pmtt0[pmtch] );
+	    f_bbcn[arm]++;
+	  }
+      }
+
+
+    //cout << "nhits " << f_bbcn[0] << "\t" << f_bbcn[1] << endl;
+    //cout << "bbcte " << f_bbcte[0] << "\t" << f_bbcte[1] << endl;
+
+    for (int iarm = 0; iarm < 2; iarm++)
+      {
+	if ( hit_times[iarm].empty() )
+	  {
+	    //cout << "hit_times size == 0" << endl;
+	    continue;
+	  }
+
+	//cout << "EARLIEST " << iarm << endl;
+	//cout << "ERROR hit_times size == " << hit_times[iarm].size() << endl;
+
+	//std::sort(hit_times[iarm].begin(), hit_times[iarm].end());
+	float earliest = hit_times[iarm].at(0);
+	//cout << "earliest" << iarm << "\t" << earliest << endl;
+	
+	f_bbcte[iarm] = earliest;
+
+	//_bbcout->AddBbcNS(iarm, f_bbcn[iarm], f_bbcq[iarm], f_bbct[iarm]);
+      }
+
+    // Get Zvertex, T0
+    if (f_bbcn[0] > 0 && f_bbcn[1] > 0)
+      {
+	/*
+    // Now calculate zvtx, t0 from best times
+    cout << "t0\t" << f_bbct[0] << "\t" << f_bbct[1] << endl;
+    f_bbcz = (f_bbct[0] - f_bbct[1]) * C / 2.0;
+    f_bbct0 = (f_bbct[0] + f_bbct[1]) / 2.0;
+	*/
+
+	//cout << "t0\t" << f_bbct[0] << "\t" << f_bbct[1] << endl;
+	//cout << "te\t" << f_bbcte[0] << "\t" << f_bbcte[1] << endl;
+	f_bbcz = (f_bbcte[0] - f_bbcte[1]) * TMath::C() * 1e-7 / 2.0; // in cm
+	//cout << "bbcz " << f_bbcz << endl;
+	//_bbcout->set_Vertex(f_bbcz, 0.6);
+	//_bbcout->set_TimeZero(f_bbct0, 0.05);
+      }
+
+    return f_bbcz;
+}
 #endif

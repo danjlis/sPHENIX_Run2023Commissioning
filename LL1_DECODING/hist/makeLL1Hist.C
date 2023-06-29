@@ -30,13 +30,15 @@ void makeLL1Hist::Loop()
 
    Long64_t nbytes = 0, nb = 0;
    int id;
-   int thresh = 3;
+   int thresh = 2;
    int bad = 0;
+
    for (Long64_t jentry=0; jentry<(nentries < 1000000? nentries: 1000000);jentry++) {
       Long64_t ientry = LoadTree(jentry);
       if (ientry < 0) break;
       nb = fChain->GetEntry(jentry);   nbytes += nb;
       if (Cut(ientry) < 0) continue;
+
       if (nhit_n[9] >= thresh && nhit_s[9] >= thresh){
 	id = 9;
       }
@@ -73,6 +75,7 @@ void makeLL1Hist::Loop()
 	//   }
 	// cin >> id;
 	bad++;
+	id = 9;
 	//	continue;
       }
 
